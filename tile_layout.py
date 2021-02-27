@@ -8,18 +8,20 @@ class TileLayout(QtWidgets.QGridLayout):
     A layout where the user can drag and drop widgets and resize them
     """
 
-    def __init__(self, column_number, row_number, *args, **kwargs):
+    def __init__(self, row_number, column_number, vertical_spawn, horizontal_span, *args, **kwargs):
         super(TileLayout, self).__init__(*args, **kwargs)
         self.setSpacing(5)
         self.row_number = row_number
         self.column_number = column_number
+        self.vertical_span = vertical_spawn
+        self.horizontal_span = horizontal_span
         self.tile_map = []
 
         for i in range(self.row_number):
-            self.setRowMinimumHeight(i, 100)
+            self.setRowMinimumHeight(i, self.vertical_span)
         self.setRowStretch(self.row_number, 1)
         for i in range(self.column_number):
-            self.setColumnMinimumWidth(i, 100)
+            self.setColumnMinimumWidth(i, self.horizontal_span)
         self.setColumnStretch(self.column_number, 1)
 
         for i_row in range(self.row_number):
@@ -47,7 +49,7 @@ class TileLayout(QtWidgets.QGridLayout):
 
     def create_tile(self, from_row, from_column, row_span=1, column_span=1, update_tile_map=False):
         """creates a tile: a tile is basically a place holder that can contain a widget or not"""
-        tile = Tile(self, from_row, from_column, row_span, column_span, self.verticalSpacing(), self.horizontalSpacing())
+        tile = Tile(self, from_row, from_column, row_span, column_span, self.verticalSpacing(), self.horizontalSpacing(), self.vertical_span, self.horizontal_span)
         self.addWidget(tile, from_row, from_column, row_span, column_span)
 
         if update_tile_map:

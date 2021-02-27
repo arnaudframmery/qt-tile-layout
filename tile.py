@@ -10,7 +10,8 @@ class Tile(QtWidgets.QWidget):
     The basic component of a tileLayout
     """
 
-    def __init__(self, tile_layout, from_row, from_column, row_span, column_span, vertical_spacing, horizontal_spacing, *args, **kwargs):
+    def __init__(self, tile_layout, from_row, from_column, row_span, column_span, vertical_spacing, horizontal_spacing,
+                 vertical_span=100, horizontal_span=100, *args, **kwargs):
         super(Tile, self).__init__(*args, **kwargs)
         self.tile_layout = tile_layout
         self.from_row = from_row
@@ -19,6 +20,8 @@ class Tile(QtWidgets.QWidget):
         self.column_span = column_span
         self.vertical_spacing = vertical_spacing
         self.horizontal_spacing = horizontal_spacing
+        self.vertical_span = vertical_span
+        self.horizontal_span = horizontal_span
         self.resize_margin = 5
 
         self.filled = False
@@ -35,8 +38,8 @@ class Tile(QtWidgets.QWidget):
 
     def update_size_limit(self):
         """refreshs the tile size limit"""
-        self.setFixedHeight(self.row_span * 100 + (self.row_span - 1) * self.vertical_spacing)
-        self.setFixedWidth(self.column_span * 100 + (self.column_span - 1) * self.horizontal_spacing)
+        self.setFixedHeight(self.row_span * self.vertical_span + (self.row_span - 1) * self.vertical_spacing)
+        self.setFixedWidth(self.column_span * self.horizontal_span + (self.column_span - 1) * self.horizontal_spacing)
 
     def update_size(self, from_row=None, from_column=None, row_span=None, column_span=None):
         """changes the tile size"""
@@ -90,6 +93,8 @@ class Tile(QtWidgets.QWidget):
 
     def mouseMoveEvent(self, event):
         """actions to do when the mouse is moved"""
+        if not self.filled:
+            return None
         if self.lock is None:
             if event.pos().x() < self.resize_margin or event.pos().x() > self.width() - self.resize_margin:
                 self.setCursor(QtGui.QCursor(QtCore.Qt.SizeHorCursor))
@@ -108,52 +113,21 @@ class Tile(QtWidgets.QWidget):
 
     def mouseReleaseEvent(self, event):
         """actions to do when the mouse button is released"""
+        if self.lock is None:
+            return None
+
         x, y = event.pos().x(), event.pos().y()
         (dir_x, dir_y) = self.lock
+        span = self.horizontal_span*(dir_x != 0) + self.vertical_span*(dir_y != 0)
+        tile_span = self.column_span*(dir_x != 0) + self.row_span*(dir_y != 0)
+        spacing = self.vertical_spacing*(dir_x != 0) + self.horizontal_spacing*(dir_y != 0)
 
         tile_number = int(
-            (x*(dir_x != 0) + y*(dir_y != 0) + (100/2) - 100*(self.column_span*dir_x**2 + self.row_span*dir_y**2)*((dir_x + dir_y) == 1))
-            // (100 + self.vertical_spacing*(dir_x != 0) + self.horizontal_spacing*(dir_y != 0))
+            (x*(dir_x != 0) + y*(dir_y != 0) + (span/2) - span*tile_span*((dir_x + dir_y) == 1))
+            // (span + spacing)
         )
 
         self.tile_layout.resize_tile(self.lock, self.from_row, self.from_column, tile_number)
-
-        # if self.lock == (-1, 0):
-        #     tile_number = int((x + (100 / 2)) // (100 + self.vertical_spacing))
-        #     self.tile_layout.expand_tile(
-        #         (-1, 0),
-        #         self.from_row,
-        #         self.from_column,
-        #         tile_number
-        #     )
-        #
-        # elif self.lock == (1, 0):
-        #     tile_number = int((x - 100 * self.column_span + (100 / 2)) // (100 + self.vertical_spacing))
-        #     self.tile_layout.expand_tile(
-        #         (1, 0),
-        #         self.from_row,
-        #         self.from_column,
-        #         tile_number
-        #     )
-        #
-        # elif self.lock == (0, -1):
-        #     tile_number = int((y + (100 / 2)) // (100 + self.horizontal_spacing))
-        #     self.tile_layout.expand_tile(
-        #         (0, -1),
-        #         self.from_row,
-        #         self.from_column,
-        #         tile_number
-        #     )
-        #
-        # elif self.lock == (0, 1):
-        #     tile_number = int((y - 100 * self.row_span + (100 / 2)) // (100 + self.horizontal_spacing))
-        #     self.tile_layout.expand_tile(
-        #         (0, 1),
-        #         self.from_row,
-        #         self.from_column,
-        #         tile_number
-        #     )
-
         self.lock = None
 
     def mousePressEvent(self, event):
@@ -161,11 +135,11 @@ class Tile(QtWidgets.QWidget):
         if event.pos().x() < self.resize_margin:
             self.lock = (-1, 0)  # 'west'
         elif event.pos().x() > self.width() - self.resize_margin:
-            self.lock = (1, 0)  # 'east'
+            self.lock = (1, 0)   # 'east'
         elif event.pos().y() < self.resize_margin:
             self.lock = (0, -1)  # 'north'
         elif event.pos().y() > self.height() - self.resize_margin:
-            self.lock = (0, 1)  # 'south'
+            self.lock = (0, 1)   # 'south'
         elif event.button() == Qt.LeftButton and self.filled:
 
             drag = QDrag(self)
