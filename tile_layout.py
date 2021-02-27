@@ -4,6 +4,9 @@ from tile import Tile
 
 
 class TileLayout(QtWidgets.QGridLayout):
+    """
+    A layout where the user can drag and drop widgets and resize them
+    """
 
     def __init__(self, column_number, row_number, *args, **kwargs):
         super(TileLayout, self).__init__(*args, **kwargs)
@@ -26,6 +29,7 @@ class TileLayout(QtWidgets.QGridLayout):
                 self.tile_map[-1].append(tile)
 
     def add_widget(self, widget, from_row, from_column, row_span=1, column_span=1):
+        """adds a widget in the layout: works like the addWidget method in a gridLayout"""
         if row_span > 1 or column_span > 1:
             tile_positions = [
                 (from_row + row, from_column + column)
@@ -42,6 +46,7 @@ class TileLayout(QtWidgets.QGridLayout):
         tile.add_widget(widget)
 
     def create_tile(self, from_row, from_column, row_span=1, column_span=1, update_tile_map=False):
+        """creates a tile: a tile is basically a place holder that can contain a widget or not"""
         tile = Tile(self, from_row, from_column, row_span, column_span, self.verticalSpacing(), self.horizontalSpacing())
         self.addWidget(tile, from_row, from_column, row_span, column_span)
 
@@ -56,154 +61,106 @@ class TileLayout(QtWidgets.QGridLayout):
 
         return tile
 
-    def expand_tile(self, direction, from_row, from_column, tile_number):  # TODO: refacto
+    def resize_tile(self, direction, from_row, from_column, tile_number):
+        """called when a tile is resized"""
         tile = self.tile_map[from_row][from_column]
         row_span = tile.get_row_span()
         column_span = tile.get_column_span()
-        tiles_to_merge = []
         increase = True
+        (dir_x, dir_y) = direction
 
-        if direction == 'west':
-            if tile_number < 0:
-                tile_number, tiles_to_merge = self.get_tile_number_available(
-                    'west',
-                    from_row,
-                    from_column,
-                    tile_number
-                )
-            elif tile_number > 0:
-                increase = False
-                tile_number = tile_number if tile_number < column_span else column_span - 1
-                tiles_to_merge = [
-                    (from_row + row, from_column + column)
-                    for row in range(row_span)
-                    for column in range(tile_number)
-                ]
-            column_span += -tile_number
-            from_column += tile_number
+        if tile_number*(dir_x + dir_y) > 0:
+            tile_number, tiles_to_merge = self.get_tiles_to_merge(direction, from_row, from_column, tile_number)
+        else:
+            tile_number, tiles_to_merge = self.get_tiles_to_split(direction, from_row, from_column, tile_number)
+            increase = False
 
-        elif direction == 'east':
-            if tile_number > 0:
-                tile_number, tiles_to_merge = self.get_tile_number_available(
-                    'east',
-                    from_row,
-                    from_column,
-                    tile_number
-                )
-            elif tile_number < 0:
-                increase = False
-                tile_number = tile_number if -tile_number < column_span else -column_span + 1
-                tiles_to_merge = [
-                    (from_row + row, from_column + column_span - column - 1)
-                    for row in range(row_span)
-                    for column in range(-tile_number)
-                ]
-            column_span += tile_number
+        column_span += tile_number*dir_x
+        from_column += tile_number*(dir_x == -1)
+        row_span += tile_number*dir_y
+        from_row += tile_number*(dir_y == -1)
 
-        elif direction == 'north':
-            if tile_number < 0:
-                tile_number, tiles_to_merge = self.get_tile_number_available(
-                    'north',
-                    from_row,
-                    from_column,
-                    tile_number
-                )
-            elif tile_number > 0:
-                increase = False
-                tile_number = tile_number if tile_number < row_span else row_span - 1
-                tiles_to_merge = [
-                    (from_row + row, from_column + column)
-                    for row in range(tile_number)
-                    for column in range(column_span)
-                ]
-            row_span += -tile_number
-            from_row += tile_number
-
-        elif direction == 'south':
-            if tile_number > 0:
-                tile_number, tiles_to_merge = self.get_tile_number_available(
-                    'south',
-                    from_row,
-                    from_column,
-                    tile_number
-                )
-            elif tile_number < 0:
-                increase = False
-                tile_number = tile_number if -tile_number < row_span else -row_span + 1
-                tiles_to_merge = [
-                    (from_row + row_span - row - 1, from_column + column)
-                    for row in range(-tile_number)
-                    for column in range(column_span)
-                ]
-            row_span += tile_number
-
-        print(tiles_to_merge, increase)
-        print(from_row, from_column, row_span, column_span)
         if tiles_to_merge and increase:
             self.merge_tiles(tile, from_row, from_column, row_span, column_span, tiles_to_merge)
         elif tiles_to_merge:
             self.split_tiles(tile, from_row, from_column, row_span, column_span, tiles_to_merge)
 
-    def get_tile_number_available(self, direction, from_row, from_column, tile_number):  # TODO: refacto
+    def get_tiles_to_split(self, direction, from_row, from_column, tile_number):
+        """finds the tiles to split when a tile is decreased"""
+        tile = self.tile_map[from_row][from_column]
+        row_span = tile.get_row_span()
+        column_span = tile.get_column_span()
+        (dir_x, dir_y) = direction
+
+        tile_number = (
+            tile_number
+            if -tile_number*(dir_x + dir_y) < column_span*(dir_x != 0) + row_span*(dir_y != 0)
+            else (1 - column_span)*dir_x + (1 - row_span)*dir_y
+        )
+        tiles_to_merge = [
+            (
+                from_row + row + (row_span - 2*row - 1)*(dir_y == 1),
+                from_column + column + (column_span - 2*column - 1)*(dir_x == 1)
+            )
+            for row in range(-tile_number*dir_y + row_span*(dir_x != 0))
+            for column in range(-tile_number*dir_x + column_span*(dir_y != 0))
+        ]
+
+        return tile_number, tiles_to_merge
+
+    def get_tiles_to_merge(self, direction, from_row, from_column, tile_number):
+        """finds the tiles to merge when a tile is increased"""
         tile = self.tile_map[from_row][from_column]
         row_span = tile.get_row_span()
         column_span = tile.get_column_span()
         tile_number_available = 0
         tiles_to_merge = []
+        (dir_x, dir_y) = direction
 
-        if direction == 'west':
-            tile_number = max(tile_number, -from_column)
-            for column in range(-tile_number):
+        tile_number = (
+            max(tile_number, -from_column*(dir_x != 0) - from_row*(dir_y != 0))
+            if (dir_x + dir_y == -1)
+            else min(
+                tile_number,
+                ((self.column_number - from_column - column_span)*(dir_x != 0)
+                 + (self.row_number - from_row - row_span)*(dir_y != 0))
+            )
+        )
+
+        if dir_x != 0:
+            for column in range(tile_number*dir_x):
                 tiles_to_check = []
+                column_delta = (column_span + column)*(dir_x == 1) + (-column - 1)*(dir_x == -1)
                 for row in range(row_span):
-                    tiles_to_check.append((from_row + row, from_column - column - 1))
-                    if self.tile_map[from_row + row][from_column - column - 1].is_filled():
+                    tiles_to_check.append((from_row + row, from_column + column_delta))
+                    if self.tile_map[from_row + row][from_column + column_delta].is_filled():
                         return tile_number_available, self.flatten_list(tiles_to_merge)
-                tile_number_available -= 1
+                tile_number_available += dir_x
                 tiles_to_merge.append(tiles_to_check)
 
-        elif direction == 'east':
-            tile_number = min(tile_number, self.column_number - from_column - column_span)
-            for column in range(tile_number):
+        else:
+            for row in range(tile_number*dir_y):
                 tiles_to_check = []
-                for row in range(row_span):
-                    tiles_to_check.append((from_row + row, from_column + column_span + column))
-                    if self.tile_map[from_row + row][from_column + column_span + column].is_filled():
-                        return tile_number_available, self.flatten_list(tiles_to_merge)
-                tile_number_available += 1
-                tiles_to_merge.append(tiles_to_check)
-
-        elif direction == 'north':
-            tile_number = max(tile_number, -from_row)
-            for row in range(-tile_number):
-                tiles_to_check = []
+                row_delta = (row_span + row)*(dir_y == 1) + (-row - 1)*(dir_y == -1)
                 for column in range(column_span):
-                    tiles_to_check.append((from_row - row - 1, from_column + column))
-                    if self.tile_map[from_row - row - 1][from_column + column].is_filled():
+                    tiles_to_check.append((from_row + row_delta, from_column + column))
+                    if self.tile_map[from_row + row_delta][from_column + column].is_filled():
                         return tile_number_available, self.flatten_list(tiles_to_merge)
-                tile_number_available -= 1
-                tiles_to_merge.append(tiles_to_check)
-
-        elif direction == 'south':
-            tile_number = min(tile_number, self.row_number - from_row - row_span)
-            for row in range(tile_number):
-                tiles_to_check = []
-                for column in range(column_span):
-                    tiles_to_check.append((from_row + row_span + row, from_column + column))
-                    if self.tile_map[from_row + row_span + row][from_column + column].is_filled():
-                        return tile_number_available, self.flatten_list(tiles_to_merge)
-                tile_number_available += 1
+                tile_number_available += dir_y
                 tiles_to_merge.append(tiles_to_check)
 
         return tile_number_available, self.flatten_list(tiles_to_merge)
 
     def get_tile(self, row, column):
+        """returns the tile at the given position"""
         return self.tile_map[row][column]
 
     def delete_tile(self, row, column):
+        """deletes the tile at the given position"""
         self.removeWidget(self.tile_map[row][column])
 
     def merge_tiles(self, tile, from_row, from_column, row_span, column_span, tiles_to_merge):
+        """merges the tiles_to_merge with tile"""
         for row, column in tiles_to_merge:
             self.delete_tile(row, column)
             self.tile_map[row][column] = tile
@@ -213,6 +170,7 @@ class TileLayout(QtWidgets.QGridLayout):
         tile.update_size(from_row, from_column, row_span, column_span)
 
     def split_tiles(self, tile, from_row, from_column, row_span, column_span, tiles_to_split):
+        """splits the tiles_to_split from tile"""
         for row, column in tiles_to_split:
             self.create_tile(row, column, update_tile_map=True)
 
@@ -222,4 +180,5 @@ class TileLayout(QtWidgets.QGridLayout):
 
     @staticmethod
     def flatten_list(to_flatten):
+        """returns a 1D list given a 2D list"""
         return [item for a_list in to_flatten for item in a_list]

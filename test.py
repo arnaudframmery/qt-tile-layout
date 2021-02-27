@@ -6,6 +6,9 @@ from tile_layout import TileLayout
 
 
 class MainWindow(QtWidgets.QMainWindow):
+    """
+    creates a window and spawns some widgets to be able to test the tile layout
+    """
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -26,6 +29,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.central_widget)
 
     def spawn_widget(self):
+        """spawns a little color widget"""
         label = QtWidgets.QLabel(self)
         label.setText(f'Label')
         label.setAutoFillBackground(True)
