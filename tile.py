@@ -96,12 +96,14 @@ class Tile(QtWidgets.QWidget):
         if not self.filled:
             return None
         if self.lock is None:
-            if event.pos().x() < self.resize_margin or event.pos().x() > self.width() - self.resize_margin:
+            if (event.pos().x() < self.resize_margin or event.pos().x() > self.width() - self.resize_margin) and self.tile_layout.resizable:
                 self.setCursor(QtGui.QCursor(QtCore.Qt.SizeHorCursor))
-            elif event.pos().y() < self.resize_margin or event.pos().y() > self.height() - self.resize_margin:
+            elif (event.pos().y() < self.resize_margin or event.pos().y() > self.height() - self.resize_margin) and self.tile_layout.resizable:
                 self.setCursor(QtGui.QCursor(QtCore.Qt.SizeVerCursor))
-            else:
+            elif self.tile_layout.drag_and_drop:
                 self.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
+            else:
+                self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
         elif self.lock == (-1, 0):
             None
         elif self.lock == (1, 0):
@@ -132,15 +134,15 @@ class Tile(QtWidgets.QWidget):
 
     def mousePressEvent(self, event):
         """actions to do when the mouse button is pressed"""
-        if event.pos().x() < self.resize_margin:
+        if event.pos().x() < self.resize_margin and self.tile_layout.resizable:
             self.lock = (-1, 0)  # 'west'
-        elif event.pos().x() > self.width() - self.resize_margin:
+        elif event.pos().x() > self.width() - self.resize_margin and self.tile_layout.resizable:
             self.lock = (1, 0)   # 'east'
-        elif event.pos().y() < self.resize_margin:
+        elif event.pos().y() < self.resize_margin and self.tile_layout.resizable:
             self.lock = (0, -1)  # 'north'
-        elif event.pos().y() > self.height() - self.resize_margin:
+        elif event.pos().y() > self.height() - self.resize_margin and self.tile_layout.resizable:
             self.lock = (0, 1)   # 'south'
-        elif event.button() == Qt.LeftButton and self.filled:
+        elif event.button() == Qt.LeftButton and self.filled and self.tile_layout.drag_and_drop:
 
             drag = QDrag(self)
             mime_data = QMimeData()
@@ -161,7 +163,7 @@ class Tile(QtWidgets.QWidget):
 
     def dragEnterEvent(self, event):
         """checks if a tile can be drop on this one"""
-        if not self.filled:
+        if not self.filled and self.tile_layout.drag_and_drop:
             event.acceptProposedAction()
 
     def dropEvent(self, event):

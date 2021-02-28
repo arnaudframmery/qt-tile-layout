@@ -51,6 +51,12 @@ class MainWindow(QtWidgets.QMainWindow):
             horizontal_span=150,
         )
 
+        # allows the user to drag and drop tiles or not
+        self.tile_layout.accept_drag_and_drop(True)
+
+        # allows the user to resize tiles or not
+        self.tile_layout.accept_resizing(True)
+
         # add widgets in the tile layout
         for i_row in range(row_number - 2):
             for i_column in range(column_number):

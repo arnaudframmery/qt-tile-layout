@@ -15,6 +15,9 @@ class TileLayout(QtWidgets.QGridLayout):
         self.column_number = column_number
         self.vertical_span = vertical_spawn
         self.horizontal_span = horizontal_span
+
+        self.drag_and_drop = True
+        self.resizable = True
         self.tile_map = []
 
         for i in range(self.row_number):
@@ -46,6 +49,14 @@ class TileLayout(QtWidgets.QGridLayout):
             tile = self.tile_map[from_row][from_column]
 
         tile.add_widget(widget)
+
+    def accept_drag_and_drop(self, value):
+        """is the user allowed to drag and drop tiles ?"""
+        self.drag_and_drop = value
+
+    def accept_resizing(self, value):
+        """is the user allowed to resize tiles ?"""
+        self.resizable = value
 
     def create_tile(self, from_row, from_column, row_span=1, column_span=1, update_tile_map=False):
         """creates a tile: a tile is basically a place holder that can contain a widget or not"""
