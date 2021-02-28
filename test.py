@@ -1,8 +1,32 @@
-from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtGui import QPalette
+import random
 import sys
+from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5.QtGui import QPalette, QFont
 
 from tile_layout import TileLayout
+
+
+possible_text = [
+    'Hello',
+    'Salut',
+    'Hallo',
+    'Hola',
+    'Ciao',
+    'Ola',
+    'Hej',
+    'Saluton',
+    'Szia',
+]
+
+possible_colors = [
+    (255, 153, 51),  # orange
+    (153, 0, 153),   # purple
+    (204, 204, 0),   # yellow
+    (51, 102, 204),  # blue
+    (0, 204, 102),   # green
+    (153, 102, 51),  # brown
+    (255, 51, 51),   # red
+]
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -13,8 +37,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
 
-        self.palette = QPalette()
-        self.palette.setColor(QPalette.Background, QtGui.QColor(0, 225, 225))
+        self.font = QFont('Latin', 15)
+        self.font.setBold(True)
 
         row_number = 6
         column_number = 4
@@ -48,12 +72,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.central_widget)
 
     def spawn_widget(self):
-        """spawns a little color widget"""
+        """spawns a little colored widget with text"""
         label = QtWidgets.QLabel(self)
-        label.setText(f'Label')
+        label.setText(random.choice(possible_text))
+        label.setFont(self.font)
+        label.setAlignment(QtCore.Qt.AlignCenter)
         label.setAutoFillBackground(True)
-        label.setPalette(self.palette)
+        label.setPalette(self.spawn_color())
         return label
+
+    @staticmethod
+    def spawn_color():
+        """spawns a random color"""
+        palette = QPalette()
+        palette.setColor(QPalette.Background, QtGui.QColor(*random.choice(possible_colors)))
+        return palette
 
 
 app = QtWidgets.QApplication(sys.argv)
