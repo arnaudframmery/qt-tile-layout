@@ -85,11 +85,10 @@ class Tile(QtWidgets.QWidget):
             for row in range(self.row_span)
             for column in range(self.column_span)
         ]
-        for (row, column) in tile_positions[1:]:
+
+        self.tile_layout.delete_tile(self.from_row, self.from_column)
+        for (row, column) in tile_positions:
             self.tile_layout.create_tile(row, column, update_tile_map=True)
-        self.row_span = 1
-        self.column_span = 1
-        self.update_size_limit()
 
     def mouseMoveEvent(self, event):
         """actions to do when the mouse is moved"""
@@ -142,8 +141,8 @@ class Tile(QtWidgets.QWidget):
             self.lock = (0, -1)  # 'north'
         elif event.pos().y() > self.height() - self.resize_margin and self.tile_layout.resizable:
             self.lock = (0, 1)   # 'south'
-        elif event.button() == Qt.LeftButton and self.filled and self.tile_layout.drag_and_drop:
 
+        elif event.button() == Qt.LeftButton and self.filled and self.tile_layout.drag_and_drop:
             drag = QDrag(self)
             mime_data = QMimeData()
             data = {
@@ -154,6 +153,9 @@ class Tile(QtWidgets.QWidget):
             }
             data_to_text = json.dumps(data)
             mime_data.setText(data_to_text)
+            drag_icon = self.widget.grab()
+
+            drag.setPixmap(drag_icon)
             drag.setMimeData(mime_data)
             drag.setHotSpot(event.pos() - self.rect().topLeft())
 
