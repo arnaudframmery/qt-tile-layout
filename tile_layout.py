@@ -18,6 +18,7 @@ class TileLayout(QtWidgets.QGridLayout):
 
         self.drag_and_drop = True
         self.resizable = True
+        self.widget_to_drop = None
         self.tile_map = []
 
         for i in range(self.row_number):
@@ -190,6 +191,25 @@ class TileLayout(QtWidgets.QGridLayout):
         self.removeWidget(tile)
         self.addWidget(tile, from_row, from_column, row_span, column_span)
         tile.update_size(from_row, from_column, row_span, column_span)
+
+    def is_empty(self, from_row, from_column, row_span, column_span):
+        """checks if the given space is free from widgets"""
+        if ((from_row + row_span > self.row_number) or (from_column + column_span > self.column_number) or
+                (from_row < 0) or (from_column < 0)):
+            return False
+        else:
+            return all([not self.tile_map[from_row + row][from_column + column].is_filled()
+                        for row in range(row_span) for column in range(column_span)])
+
+    def get_widget_to_drop(self):
+        """gets the widget that the user is dragging"""
+        widget = self.widget_to_drop
+        self.widget_to_drop = None
+        return widget
+
+    def set_widget_to_drop(self, widget):
+        """sets the widget that the user is dragging"""
+        self.widget_to_drop = widget
 
     @staticmethod
     def flatten_list(to_flatten):

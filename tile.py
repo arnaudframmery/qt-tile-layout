@@ -56,10 +56,6 @@ class Tile(QtWidgets.QWidget):
         self.widget = widget
         self.filled = True
 
-    def get_widget(self):
-        """returns the widget in the tile"""
-        return self.widget
-
     def get_row_span(self):
         """returns the tile row span"""
         return self.row_span
@@ -74,43 +70,25 @@ class Tile(QtWidgets.QWidget):
 
     def remove_widget(self):
         """removes the tile widget"""
+        self.widget.setMouseTracking(True)
         self.layout.removeWidget(self.widget)
         self.widget = None
         self.filled = False
 
-    def split_tile(self):
-        """splits the tile: therefore the row span and column span become 1"""
-        tile_positions = [
-            (self.from_row + row, self.from_column + column)
-            for row in range(self.row_span)
-            for column in range(self.column_span)
-        ]
-
-        self.tile_layout.delete_tile(self.from_row, self.from_column)
-        for (row, column) in tile_positions:
-            self.tile_layout.create_tile(row, column, update_tile_map=True)
-
     def mouseMoveEvent(self, event):
         """actions to do when the mouse is moved"""
         if not self.filled:
-            return None
-        if self.lock is None:
+            self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+
+        elif self.lock is None:
             if (event.pos().x() < self.resize_margin or event.pos().x() > self.width() - self.resize_margin) and self.tile_layout.resizable:
                 self.setCursor(QtGui.QCursor(QtCore.Qt.SizeHorCursor))
+
             elif (event.pos().y() < self.resize_margin or event.pos().y() > self.height() - self.resize_margin) and self.tile_layout.resizable:
                 self.setCursor(QtGui.QCursor(QtCore.Qt.SizeVerCursor))
+
             elif self.tile_layout.drag_and_drop:
                 self.setCursor(QtGui.QCursor(QtCore.Qt.OpenHandCursor))
-            else:
-                self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        elif self.lock == (-1, 0):
-            None
-        elif self.lock == (1, 0):
-            None
-        elif self.lock == (0, -1):
-            None
-        elif self.lock == (0, 1):
-            None
 
     def mouseReleaseEvent(self, event):
         """actions to do when the mouse button is released"""
@@ -119,13 +97,13 @@ class Tile(QtWidgets.QWidget):
 
         x, y = event.pos().x(), event.pos().y()
         (dir_x, dir_y) = self.lock
+        
         span = self.horizontal_span*(dir_x != 0) + self.vertical_span*(dir_y != 0)
         tile_span = self.column_span*(dir_x != 0) + self.row_span*(dir_y != 0)
         spacing = self.vertical_spacing*(dir_x != 0) + self.horizontal_spacing*(dir_y != 0)
 
         tile_number = int(
-            (x*(dir_x != 0) + y*(dir_y != 0) + (span/2) - span*tile_span*((dir_x + dir_y) == 1))
-            // (span + spacing)
+            (x*(dir_x != 0) + y*(dir_y != 0) + (span/2) - span*tile_span*((dir_x + dir_y) == 1)) // (span + spacing)
         )
 
         self.tile_layout.resize_tile(self.lock, self.from_row, self.from_column, tile_number)
@@ -143,35 +121,92 @@ class Tile(QtWidgets.QWidget):
             self.lock = (0, 1)   # 'south'
 
         elif event.button() == Qt.LeftButton and self.filled and self.tile_layout.drag_and_drop:
-            drag = QDrag(self)
-            mime_data = QMimeData()
-            data = {
-                'from_row': self.from_row,
-                'from_column': self.from_column,
-                'row_span': self.row_span,
-                'column_span': self.column_span,
-            }
-            data_to_text = json.dumps(data)
-            mime_data.setText(data_to_text)
-            drag_icon = self.widget.grab()
 
-            drag.setPixmap(drag_icon)
-            drag.setMimeData(mime_data)
-            drag.setHotSpot(event.pos() - self.rect().topLeft())
+            drag = self.prepare_drop_data(event)
+            self.drag_and_drop_process(drag)
 
-            if drag.exec_() == 2:
-                self.split_tile()
-                self.remove_widget()
+    def prepare_drop_data(self, event):
+        """prepares data for the drag and drop process"""
+        drag = QDrag(self)
+
+        drop_data = QMimeData()
+        data = {
+            'from_row': self.from_row,
+            'from_column': self.from_column,
+            'row_span': self.row_span,
+            'column_span': self.column_span,
+            'row_offset': event.pos().y() // (self.vertical_span + self.vertical_spacing),
+            'column_offset': event.pos().x() // (self.horizontal_span + self.horizontal_spacing),
+        }
+        data_to_text = json.dumps(data)
+        drop_data.setText(data_to_text)
+        drag_icon = self.widget.grab()
+
+        drag.setPixmap(drag_icon)
+        drag.setMimeData(drop_data)
+        drag.setHotSpot(event.pos() - self.rect().topLeft())
+
+        return drag
+
+    def drag_and_drop_process(self, drag):
+        """manages the drag and drop process"""
+        previous_row_span = self.row_span
+        previous_column_span = self.column_span
+
+        self.tile_layout.set_widget_to_drop(self.widget)
+        tiles_to_split = [
+            (self.from_row + row, self.from_column + column)
+            for row in range(self.row_span)
+            for column in range(self.column_span)
+        ]
+
+        # TODO: refacto the part below
+        self.tile_layout.split_tiles(self, self.from_row, self.from_column, 1, 1, tiles_to_split[1:])
+        self.tile_layout.removeWidget(self)
+        new_tile = self.tile_layout.create_tile(self.from_row, self.from_column, update_tile_map=True)
+        self.setVisible(False)
+
+        if drag.exec_() != 2:
+            self.tile_layout.merge_tiles(
+                new_tile, self.from_row, self.from_column, previous_row_span, previous_column_span, tiles_to_split[1:]
+            )
+            new_tile.add_widget(self.tile_layout.get_widget_to_drop())
+
+        self.remove_widget()
+        self.setVisible(True)
 
     def dragEnterEvent(self, event):
         """checks if a tile can be drop on this one"""
-        if not self.filled and self.tile_layout.drag_and_drop:
+        if self.tile_layout.drag_and_drop and self.is_drop_possible(event):
             event.acceptProposedAction()
 
     def dropEvent(self, event):
         """actions to do when a tile is dropped on this one"""
-        data = json.loads(event.mimeData().text())
-        dragged_tile = self.tile_layout.get_tile(data['from_row'], data['from_column'])
+        drop_data = json.loads(event.mimeData().text())
 
-        self.add_widget(dragged_tile.get_widget())
+        tiles_to_merge = [
+            (self.from_row + row - drop_data['row_offset'], self.from_column + column - drop_data['column_offset'])
+            for row in range(drop_data['row_span'])
+            for column in range(drop_data['column_span'])
+        ]
+        self.tile_layout.merge_tiles(
+            self,
+            self.from_row - drop_data['row_offset'],
+            self.from_column - drop_data['column_offset'],
+            drop_data['row_span'],
+            drop_data['column_span'],
+            tiles_to_merge
+        )
+
+        self.add_widget(self.tile_layout.get_widget_to_drop())
         event.acceptProposedAction()
+
+    def is_drop_possible(self, event):
+        """checks if this tile can accept the drop"""
+        drop_data = json.loads(event.mimeData().text())
+        return self.tile_layout.is_empty(
+            self.from_row - drop_data['row_offset'],
+            self.from_column - drop_data['column_offset'],
+            drop_data['row_span'],
+            drop_data['column_span']
+        )
