@@ -53,20 +53,28 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # allows the user to drag and drop tiles or not
         self.tile_layout.accept_drag_and_drop(True)
-
         # allows the user to resize tiles or not
         self.tile_layout.accept_resizing(True)
+
+        # sets the default cursor shape on the tiles
+        self.tile_layout.set_cursor_idle(QtCore.Qt.ArrowCursor)
+        # sets the cursor shape when the user can grab the tile
+        self.tile_layout.set_cursor_grab(QtCore.Qt.OpenHandCursor)
+        # sets the cursor shape when the user can resize the tile horizontally
+        self.tile_layout.set_cursor_resize_horizontal(QtCore.Qt.SizeHorCursor)
+        # sets the cursor shape when the user can resize the tile vertically
+        self.tile_layout.set_cursor_resize_vertical(QtCore.Qt.SizeVerCursor)
 
         # add widgets in the tile layout
         for i_row in range(row_number - 2):
             for i_column in range(column_number):
                 self.tile_layout.add_widget(
-                    widget=self.spawn_widget(),
+                    widget=self.__spawn_widget(),
                     from_row=i_row,
                     from_column=i_column,
                 )
         self.tile_layout.add_widget(
-            widget=self.spawn_widget(),
+            widget=self.__spawn_widget(),
             from_row=row_number - 2,
             from_column=1,
             row_span=2,
@@ -77,18 +85,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.central_widget.setLayout(self.tile_layout)
         self.setCentralWidget(self.central_widget)
 
-    def spawn_widget(self):
+    def __spawn_widget(self):
         """spawns a little colored widget with text"""
         label = QtWidgets.QLabel(self)
         label.setText(random.choice(possible_text))
         label.setFont(self.font)
         label.setAlignment(QtCore.Qt.AlignCenter)
         label.setAutoFillBackground(True)
-        label.setPalette(self.spawn_color())
+        label.setPalette(self.__spawn_color())
         return label
 
     @staticmethod
-    def spawn_color():
+    def __spawn_color():
         """spawns a random color"""
         palette = QPalette()
         palette.setColor(QPalette.Background, QtGui.QColor(*random.choice(possible_colors)))
