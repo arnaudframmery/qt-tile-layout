@@ -47,22 +47,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tile_layout = TileLayout(
             row_number=row_number,
             column_number=column_number,
-            vertical_spawn=100,
+            vertical_span=100,
             horizontal_span=150,
+            vertical_spacing=5,
+            horizontal_spacing=5,
         )
 
-        # allows the user to drag and drop tiles or not
+        # allow the user to drag and drop tiles or not
         self.tile_layout.accept_drag_and_drop(True)
-        # allows the user to resize tiles or not
+        # allow the user to resize tiles or not
         self.tile_layout.accept_resizing(True)
 
-        # sets the default cursor shape on the tiles
+        # set the default cursor shape on the tiles
         self.tile_layout.set_cursor_idle(QtCore.Qt.ArrowCursor)
-        # sets the cursor shape when the user can grab the tile
+        # set the cursor shape when the user can grab the tile
         self.tile_layout.set_cursor_grab(QtCore.Qt.OpenHandCursor)
-        # sets the cursor shape when the user can resize the tile horizontally
+        # set the cursor shape when the user can resize the tile horizontally
         self.tile_layout.set_cursor_resize_horizontal(QtCore.Qt.SizeHorCursor)
-        # sets the cursor shape when the user can resize the tile vertically
+        # set the cursor shape when the user can resize the tile vertically
         self.tile_layout.set_cursor_resize_vertical(QtCore.Qt.SizeVerCursor)
 
         # add widgets in the tile layout
@@ -81,6 +83,38 @@ class MainWindow(QtWidgets.QMainWindow):
             column_span=2
         )
 
+        # remove a widget from the tile layout
+        last_widget = self.__spawn_widget()
+        self.tile_layout.add_widget(
+            widget=last_widget,
+            from_row=row_number - 1,
+            from_column=0,
+            row_span=1,
+            column_span=1
+        )
+        self.tile_layout.remove_widget(last_widget)
+
+        # return the number of rows
+        print(self.tile_layout.row_count())
+        # return the number of columns
+        print(self.tile_layout.column_count())
+        # return the geometry of a specific tile
+        print(self.tile_layout.tile_rect(row_number - 1, 1))
+        # return the minimum height
+        print(self.tile_layout.row_minimum_height())
+        # return the minimum width
+        print(self.tile_layout.column_minimum_width())
+        # return the vertical spacing between two tiles
+        print(self.tile_layout.vertical_spacing())
+        # return the horizontal spacing between two tiles
+        print(self.tile_layout.horizontal_spacing())
+
+        # set the vertical spacing between two tiles
+        self.tile_layout.set_vertical_spacing(5)
+        # set the horizontal spacing between two tiles
+        self.tile_layout.set_horizontal_spacing(5)
+
+        # insert the layout in the window
         self.central_widget = QtWidgets.QWidget()
         self.central_widget.setLayout(self.tile_layout)
         self.setCentralWidget(self.central_widget)

@@ -44,37 +44,37 @@ Finally, if you put your layout into a window, you will be able to drag and drop
 
 # Documentation
 
-### TileLayout(int from_row, int from_column, int row_span, int column_span)
+```TileLayout(int from_row, int from_column, int row_span, int column_span)```
 
-_Constructs a new tile layout._
+_Constructs a new tile layout_
 
 ##### Methods:
 
-- accept_drag_and_drop(bool value)
+```accept_drag_and_drop(bool value)```
 
 _Allows or not the drag and drop of tiles in the layout_
 
-- accept_resizing(bool value)
+```accept_resizing(bool value)```
 
 _Allows or not the resizing of tiles in the layout_
 
-- add_widget(QWidget widget, int from_row, int from_column, int row_span, int column_span)
+```add_widget(QWidget widget, int from_row, int from_column, int row_span, int column_span)```
 
 _Adds the given widget to the layout, spanning multiple rows/columns. The tile will start at fromRow, fromColumn spanning rowSpan rows and columnSpan columns_
 
-- set_cursor_grab(QtCore.Qt.CursorShape value)
+```set_cursor_grab(QtCore.Qt.CursorShape value)```
 
 _Changes the cursor shape when it is possible to drag a tile_
 
-- set_cursor_idle(QtCore.Qt.CursorShape value)
+```set_cursor_idle(QtCore.Qt.CursorShape value)```
 
 _Changes the cursor shape when it is over a tile_
 
-- set_cursor_resize_horizontal(QtCore.Qt.CursorShape value)
+```set_cursor_resize_horizontal(QtCore.Qt.CursorShape value)```
 
 _Changes the cursor shape when it is possible to resize a tile horizontally_
 
-- set_cursor_resize_vertical(QtCore.Qt.CursorShape value)
+```set_cursor_resize_vertical(QtCore.Qt.CursorShape value)```
 
 _Changes the cursor shape when it is possible to resize a tile vertically_  
 

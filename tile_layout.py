@@ -8,14 +8,16 @@ class TileLayout(QtWidgets.QGridLayout):
     A layout where the user can drag and drop widgets and resize them
     """
 
-    def __init__(self, row_number, column_number, vertical_spawn, horizontal_span, *args, **kwargs):
+    def __init__(self, row_number, column_number, vertical_span, horizontal_span, vertical_spacing=5,
+                 horizontal_spacing=5, *args, **kwargs):
         super(TileLayout, self).__init__(*args, **kwargs)
 
         # geometric parameters
-        self.setSpacing(5)
+        self.setVerticalSpacing(vertical_spacing)
+        self.setHorizontalSpacing(horizontal_spacing)
         self.row_number = row_number
         self.column_number = column_number
-        self.vertical_span = vertical_spawn
+        self.vertical_span = vertical_span
         self.horizontal_span = horizontal_span
 
         # logic parameters
@@ -23,6 +25,7 @@ class TileLayout(QtWidgets.QGridLayout):
         self.resizable = True
         self.widget_to_drop = None
         self.tile_map = []
+        self.widget_tile_couple = {'widget': [], 'tile': []}
 
         # design parameters
         self.cursor_idle = QtCore.Qt.ArrowCursor
@@ -35,18 +38,45 @@ class TileLayout(QtWidgets.QGridLayout):
 
     def add_widget(self, widget, from_row, from_column, row_span=1, column_span=1):  # TODO: add assertions
         """adds a widget in the layout: works like the addWidget method in a gridLayout"""
-        tile = self.tile_map[from_row][from_column]
+        assert widget not in self.widget_tile_couple['widget']
 
-        # if the widget is on more than 1 tile, we need to merge the tiles
+        tile = self.tile_map[from_row][from_column]
+        self.widget_tile_couple['widget'].append(widget)
+        self.widget_tile_couple['tile'].append(tile)
+
+        # if the widget is on more than 1 tile, the tiles must be merged
         if row_span > 1 or column_span > 1:
             tiles_to_merge = [
                 (from_row + row, from_column + column)
                 for row in range(row_span)
                 for column in range(column_span)
             ]
-            self.merge_tiles(tile, from_row, from_column, row_span, column_span, tiles_to_merge[1:])
+            self.__merge_tiles(tile, from_row, from_column, row_span, column_span, tiles_to_merge[1:])
 
+        widget.setMouseTracking(True)
         tile.add_widget(widget)
+
+    def remove_widget(self, widget):
+        """removes the given widget"""
+        assert widget in self.widget_tile_couple['widget']
+
+        index = self.widget_tile_couple['widget'].index(widget)
+        tile = self.widget_tile_couple['tile'][index]
+
+        from_row = tile.get_from_row()
+        from_column = tile.get_from_column()
+        row_span = tile.get_row_span()
+        column_span = tile.get_column_span()
+        tiles_to_split = [
+            (from_row + row, from_column + column)
+            for row in range(row_span)
+            for column in range(column_span)
+        ]
+
+        widget.setMouseTracking(False)
+        self.hard_split_tiles(from_row, from_column, tiles_to_split)
+        self.widget_tile_couple['widget'].pop(index)
+        self.widget_tile_couple['tile'].pop(index)
 
     def accept_drag_and_drop(self, value):
         """is the user allowed to drag and drop tiles ?"""
@@ -72,6 +102,46 @@ class TileLayout(QtWidgets.QGridLayout):
         """the cursor shape when the user can resize the tile vertically"""
         self.cursor_resize_vertical = value
 
+    def row_count(self):
+        """Returns the number of rows"""
+        return self.row_number
+
+    def column_count(self):
+        """Returns the number of columns"""
+        return self.column_number
+
+    def tile_rect(self, row, column):
+        """Returns the geometry of the tile at (row, column)"""
+        return self.tile_map[row][column].rect()
+
+    def row_minimum_height(self, row=None):
+        """Returns the minimum height"""
+        return self.vertical_span
+
+    def column_minimum_width(self, column=None):
+        """Returns the minimum width"""
+        return self.horizontal_span
+
+    def vertical_spacing(self):
+        """Returns the vertical spacing between two tiles"""
+        return self.verticalSpacing()
+
+    def horizontal_spacing(self):
+        """Returns the horizontal spacing between two tiles"""
+        return self.horizontalSpacing()
+
+    def set_vertical_spacing(self, spacing):
+        """Sets the vertical spacing between two tiles"""
+        self.setVerticalSpacing(spacing)
+        self.__set_grid_minimal_size()
+        self.__update_all_tiles()
+
+    def set_horizontal_spacing(self, spacing):
+        """Sets the horizontal spacing between two tiles"""
+        self.setHorizontalSpacing(spacing)
+        self.__set_grid_minimal_size()
+        self.__update_all_tiles()
+
     def resize_tile(self, direction, from_row, from_column, tile_number):
         """called when a tile is resized"""
         tile = self.tile_map[from_row][from_column]
@@ -94,22 +164,12 @@ class TileLayout(QtWidgets.QGridLayout):
         from_row += tile_number*(dir_y == -1)
 
         if tiles_to_merge and increase:
-            self.merge_tiles(tile, from_row, from_column, row_span, column_span, tiles_to_merge)
+            self.__merge_tiles(tile, from_row, from_column, row_span, column_span, tiles_to_merge)
         elif tiles_to_merge:
             self.__split_tiles(tile, from_row, from_column, row_span, column_span, tiles_to_merge)
 
-    def merge_tiles(self, tile, from_row, from_column, row_span, column_span, tiles_to_merge):
-        """merges the tiles_to_merge with tile"""
-        for row, column in tiles_to_merge:
-            self.removeWidget(self.tile_map[row][column])
-            self.tile_map[row][column] = tile
-
-        self.removeWidget(tile)
-        self.addWidget(tile, from_row, from_column, row_span, column_span)
-        tile.update_size(from_row, from_column, row_span, column_span)
-
     def hard_split_tiles(self, from_row, from_column, tiles_to_split):
-        """splits the tiles and return the new one at (from_row, from_column"""
+        """splits the tiles and return the new one at (from_row, from_column)"""
         assert (from_row, from_column) in tiles_to_split
         tiles_to_recycle = set()
 
@@ -143,6 +203,16 @@ class TileLayout(QtWidgets.QGridLayout):
         """sets the widget that the user is dragging"""
         self.widget_to_drop = widget
 
+    def __merge_tiles(self, tile, from_row, from_column, row_span, column_span, tiles_to_merge):
+        """merges the tiles_to_merge with tile"""
+        for row, column in tiles_to_merge:
+            self.removeWidget(self.tile_map[row][column])
+            self.tile_map[row][column] = tile
+
+        self.removeWidget(tile)
+        self.addWidget(tile, from_row, from_column, row_span, column_span)
+        tile.update_size(from_row, from_column, row_span, column_span)
+
     def __split_tiles(self, tile, from_row, from_column, row_span, column_span, tiles_to_split):
         """splits the tiles_to_split from tile"""
         for row, column in tiles_to_split:
@@ -154,7 +224,15 @@ class TileLayout(QtWidgets.QGridLayout):
 
     def __create_tile(self, from_row, from_column, row_span=1, column_span=1, update_tile_map=False):
         """creates a tile: a tile is basically a place holder that can contain a widget or not"""
-        tile = Tile(self, from_row, from_column, row_span, column_span, self.verticalSpacing(), self.horizontalSpacing(), self.vertical_span, self.horizontal_span)
+        tile = Tile(
+            self,
+            from_row,
+            from_column,
+            row_span,
+            column_span,
+            self.vertical_span,
+            self.horizontal_span
+        )
         self.addWidget(tile, from_row, from_column, row_span, column_span)
 
         if update_tile_map:
@@ -236,12 +314,8 @@ class TileLayout(QtWidgets.QGridLayout):
 
         return tile_number_available, self.flatten_list(tiles_to_merge)
 
-    @staticmethod
-    def flatten_list(to_flatten):
-        """returns a 1D list given a 2D list"""
-        return [item for a_list in to_flatten for item in a_list]
-
     def __create_tile_map(self):
+        """Creates a map to be able to locate each tile on the grid"""
         for i_row in range(self.row_number):
             self.tile_map.append([])
             for i_column in range(self.column_number):
@@ -249,9 +323,24 @@ class TileLayout(QtWidgets.QGridLayout):
                 self.tile_map[-1].append(tile)
 
     def __set_grid_minimal_size(self):
+        """Sets the grid/tiles minimum size"""
         for i in range(self.row_number):
             self.setRowMinimumHeight(i, self.vertical_span)
         self.setRowStretch(self.row_number, 1)
         for i in range(self.column_number):
             self.setColumnMinimumWidth(i, self.horizontal_span)
         self.setColumnStretch(self.column_number, 1)
+
+    def __update_all_tiles(self):
+        """Forces the tiles to update their geometry"""
+        for row in range(self.row_number):
+            for column in range(self.column_number):
+                self.tile_map[row][column].update_size(
+                    vertical_span=self.vertical_span,
+                    horizontal_span=self.horizontal_span
+                )
+
+    @staticmethod
+    def flatten_list(to_flatten):
+        """returns a 1D list given a 2D list"""
+        return [item for a_list in to_flatten for item in a_list]
