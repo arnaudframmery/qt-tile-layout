@@ -29,13 +29,13 @@ class Tile(QtWidgets.QWidget):
         self.layout.setSpacing(0)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
-        self.__update_size_limit()
+        self.__updateSizeLimit()
         self.setAcceptDrops(True)
         self.setMouseTracking(True)
         self.setLayout(self.layout)
 
-    def update_size(self, from_row=None, from_column=None, row_span=None, column_span=None, vertical_span=None,
-                 horizontal_span=None):
+    def updateSize(self, from_row=None, from_column=None, row_span=None, column_span=None, vertical_span=None,
+                   horizontal_span=None):
         """changes the tile size"""
         self.from_row = from_row if from_row is not None else self.from_row
         self.from_column = from_column if from_column is not None else self.from_column
@@ -43,31 +43,31 @@ class Tile(QtWidgets.QWidget):
         self.column_span = column_span if column_span is not None else self.column_span
         self.vertical_span = vertical_span if vertical_span is not None else self.vertical_span
         self.horizontal_span = horizontal_span if horizontal_span is not None else self.horizontal_span
-        self.__update_size_limit()
+        self.__updateSizeLimit()
 
-    def add_widget(self, widget):
+    def addWidget(self, widget):
         """adds a widget in the tile"""
         self.layout.addWidget(widget)
         self.widget = widget
         self.filled = True
 
-    def get_from_row(self):
+    def getFromRow(self):
         """returns the tile from row"""
         return self.from_row
 
-    def get_from_column(self):
+    def getFromColumn(self):
         """returns the tile from column"""
         return self.from_column
 
-    def get_row_span(self):
+    def getRowSpan(self):
         """returns the tile row span"""
         return self.row_span
 
-    def get_column_span(self):
+    def getColumnSpan(self):
         """returns the tile column span"""
         return self.column_span
 
-    def is_filled(self):
+    def isFilled(self):
         """returns True if there is a widget in the tile, else False"""
         return self.filled
 
@@ -103,15 +103,15 @@ class Tile(QtWidgets.QWidget):
         if event.pos().x() < self.resize_margin and self.tile_layout.resizable:
             self.lock = (-1, 0)  # 'west'
         elif event.pos().x() > self.width() - self.resize_margin and self.tile_layout.resizable:
-            self.lock = (1, 0)   # 'east'
+            self.lock = (1, 0)  # 'east'
         elif event.pos().y() < self.resize_margin and self.tile_layout.resizable:
             self.lock = (0, -1)  # 'north'
         elif event.pos().y() > self.height() - self.resize_margin and self.tile_layout.resizable:
-            self.lock = (0, 1)   # 'south'
+            self.lock = (0, 1)  # 'south'
 
         elif self.filled and self.tile_layout.drag_and_drop:
-            drag = self.__prepare_drop_data(event)
-            self.__drag_and_drop_process(drag)
+            drag = self.__prepareDropData(event)
+            self.__dragAndDropProcess(drag)
 
     def mouseReleaseEvent(self, event):
         """actions to do when the mouse button is released"""
@@ -120,29 +120,31 @@ class Tile(QtWidgets.QWidget):
 
         x, y = event.pos().x(), event.pos().y()
         (dir_x, dir_y) = self.lock
-        
-        span = self.horizontal_span*(dir_x != 0) + self.vertical_span*(dir_y != 0)
-        tile_span = self.column_span*(dir_x != 0) + self.row_span*(dir_y != 0)
-        spacing = self.tile_layout.verticalSpacing()*(dir_x != 0) + self.tile_layout.horizontalSpacing()*(dir_y != 0)
+
+        span = self.horizontal_span * (dir_x != 0) + self.vertical_span * (dir_y != 0)
+        tile_span = self.column_span * (dir_x != 0) + self.row_span * (dir_y != 0)
+        spacing = self.tile_layout.verticalSpacing() * (dir_x != 0) + self.tile_layout.horizontalSpacing() * (
+                    dir_y != 0)
 
         tile_number = int(
-            (x*(dir_x != 0) + y*(dir_y != 0) + (span/2) - span*tile_span*((dir_x + dir_y) == 1)) // (span + spacing)
+            (x * (dir_x != 0) + y * (dir_y != 0) + (span / 2) - span * tile_span * ((dir_x + dir_y) == 1)) // (
+                        span + spacing)
         )
 
-        self.tile_layout.resize_tile(self.lock, self.from_row, self.from_column, tile_number)
+        self.tile_layout.resizeTile(self.lock, self.from_row, self.from_column, tile_number)
         self.lock = None
 
     def dragEnterEvent(self, event):
         """checks if a tile can be drop on this one"""
-        if self.tile_layout.drag_and_drop and self.__is_drop_possible(event):
+        if self.tile_layout.drag_and_drop and self.__isDropPossible(event):
             event.acceptProposedAction()
 
     def dropEvent(self, event):
         """actions to do when a tile is dropped on this one"""
         drop_data = json.loads(event.mimeData().text())
 
-        self.tile_layout.add_widget(
-            self.tile_layout.get_widget_to_drop(),
+        self.tile_layout.addWidget(
+            self.tile_layout.getWidgetToDrop(),
             self.from_row - drop_data['row_offset'],
             self.from_column - drop_data['column_offset'],
             drop_data['row_span'],
@@ -151,7 +153,7 @@ class Tile(QtWidgets.QWidget):
 
         event.acceptProposedAction()
 
-    def __prepare_drop_data(self, event):
+    def __prepareDropData(self, event):
         """prepares data for the drag and drop process"""
         drag = QDrag(self)
 
@@ -174,19 +176,19 @@ class Tile(QtWidgets.QWidget):
 
         return drag
 
-    def __drag_and_drop_process(self, drag):
+    def __dragAndDropProcess(self, drag):
         """manages the drag and drop process"""
         previous_row_span = self.row_span
         previous_column_span = self.column_span
 
-        self.tile_layout.set_widget_to_drop(self.widget)
-        self.tile_layout.remove_widget(self.widget)
+        self.tile_layout.setWidgetToDrop(self.widget)
+        self.tile_layout.removeWidget(self.widget)
         self.setVisible(False)
 
         if drag.exec_() != 2:
-            self.__remove_widget()
-            self.tile_layout.add_widget(
-                self.tile_layout.get_widget_to_drop(),
+            self.__removeWidget()
+            self.tile_layout.addWidget(
+                self.tile_layout.getWidgetToDrop(),
                 self.from_row,
                 self.from_column,
                 previous_row_span,
@@ -195,23 +197,23 @@ class Tile(QtWidgets.QWidget):
 
         self.setVisible(True)
 
-    def __is_drop_possible(self, event):
+    def __isDropPossible(self, event):
         """checks if this tile can accept the drop"""
         drop_data = json.loads(event.mimeData().text())
-        return self.tile_layout.is_empty(
+        return self.tile_layout.isAreaEmpty(
             self.from_row - drop_data['row_offset'],
             self.from_column - drop_data['column_offset'],
             drop_data['row_span'],
             drop_data['column_span']
         )
 
-    def __remove_widget(self):
+    def __removeWidget(self):
         """removes the tile widget"""
         self.layout.removeWidget(self.widget)
         self.widget = None
         self.filled = False
 
-    def __update_size_limit(self):
+    def __updateSizeLimit(self):
         """refreshs the tile size limit"""
         self.setFixedHeight(
             self.row_span * self.vertical_span + (self.row_span - 1) * self.tile_layout.verticalSpacing()

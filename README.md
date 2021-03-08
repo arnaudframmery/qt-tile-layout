@@ -31,10 +31,10 @@ layout = TileLayout(
 We can now add a widget in a specific position: it's the same as the grid layout
 
 ```python
-layout.add_widget(
+layout.addWidget(
     widget=QtWidgets.QLabel('Hello world'),
     from_row=3,
-    from_column=4,
+    from_column=2,
     row_span=1,
     column_span=2
 )
@@ -50,33 +50,81 @@ _Constructs a new tile layout_
 
 ##### Methods:
 
-```accept_drag_and_drop(bool value)```
+- ```acceptDragAndDrop(bool value)```
 
 _Allows or not the drag and drop of tiles in the layout_
 
-```accept_resizing(bool value)```
+- ```acceptResizing(bool value)```
 
 _Allows or not the resizing of tiles in the layout_
 
-```add_widget(QWidget widget, int from_row, int from_column, int row_span, int column_span)```
+- ```addWidget(QWidget widget, int from_row, int from_column, int row_span, int column_span)```
 
 _Adds the given widget to the layout, spanning multiple rows/columns. The tile will start at fromRow, fromColumn spanning rowSpan rows and columnSpan columns_
 
-```set_cursor_grab(QtCore.Qt.CursorShape value)```
+- ```columnCount() -> int```
+
+_Returns the number of column in the layout_
+
+- ```columnMinimumwidth() -> int```
+
+_Return the tile width (the name is not very obvious but it is consistent with grid layout)_
+
+- ```horizontalSpacing() -> int```
+
+_Returns the horizontal spacing between two tiles_ 
+
+- ```removeWidget(QWidget widget)```
+
+_Removes the given widget from the layout_
+
+- ```rowCount() -> int```
+
+_Returns the number of row in the layout_
+
+- ```rowMinimumHeight() -> int```
+
+_Return the tile height (the name is not very obvious but it is consistent with grid layout)_
+
+- ```setCursorGrab(QtCore.Qt.CursorShape value)```
 
 _Changes the cursor shape when it is possible to drag a tile_
 
-```set_cursor_idle(QtCore.Qt.CursorShape value)```
+- ```setCursorIdle(QtCore.Qt.CursorShape value)```
 
 _Changes the cursor shape when it is over a tile_
 
-```set_cursor_resize_horizontal(QtCore.Qt.CursorShape value)```
+- ```setCursorResizeHorizontal(QtCore.Qt.CursorShape value)```
 
 _Changes the cursor shape when it is possible to resize a tile horizontally_
 
-```set_cursor_resize_vertical(QtCore.Qt.CursorShape value)```
+- ```setCursorResizeVertical(QtCore.Qt.CursorShape value)```
 
-_Changes the cursor shape when it is possible to resize a tile vertically_  
+_Changes the cursor shape when it is possible to resize a tile vertically_
+
+- ```setHorizontalSpacing(int spacing)```
+
+_Changes the horizontal spacing between two tiles_
+
+- ```setHorizontalSpan(int span)```
+
+_Sets the horizontal span between two tiles_ 
+
+- ```setVerticalSpacing(int spacing)```
+
+_Changes the vertical spacing between two tiles_
+
+- ```setVerticalSpan(int span)```
+
+_Sets the vertical span between two tiles_ 
+
+- ```tileRect(int row, int column) -> QRect```
+
+_Returns the geometry of the tile at (row, column)_ 
+
+- ```verticalSpacing() -> int```
+
+_Returns the vertical spacing between two tiles_ 
 
 # Last word
 
