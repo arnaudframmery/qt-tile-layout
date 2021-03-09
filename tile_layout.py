@@ -1,4 +1,6 @@
 from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtCore import QRect
+from PyQt5.QtWidgets import QWidget
 
 from tile import Tile
 
@@ -7,6 +9,9 @@ class TileLayout(QtWidgets.QGridLayout):
     """
     A layout where the user can drag and drop widgets and resize them
     """
+
+    tileResized = QtCore.pyqtSignal(QWidget, int, int, int, int)
+    tileMoved = QtCore.pyqtSignal(QWidget, int, int, int, int)
 
     def __init__(self, row_number, column_number, vertical_span, horizontal_span, vertical_spacing=5,
                  horizontal_spacing=5, *args, **kwargs):
@@ -36,9 +41,10 @@ class TileLayout(QtWidgets.QGridLayout):
         self.__setGridMinimalSize()
         self.__createTileMap()
 
-    def addWidget(self, widget, from_row, from_column, row_span=1, column_span=1):  # TODO: add assertions
+    def addWidget(self, widget: QWidget, from_row: int, from_column: int, row_span: int = 1, column_span: int = 1):
         """adds a widget in the layout: works like the addWidget method in a gridLayout"""
         assert widget not in self.widget_tile_couple['widget']
+        assert self.isAreaEmpty(from_row, from_column, row_span, column_span)
 
         tile = self.tile_map[from_row][from_column]
         self.widget_tile_couple['widget'].append(widget)
@@ -56,7 +62,7 @@ class TileLayout(QtWidgets.QGridLayout):
         widget.setMouseTracking(True)
         tile.addWidget(widget)
 
-    def removeWidget(self, widget):
+    def removeWidget(self, widget: QWidget):
         """removes the given widget"""
         assert widget in self.widget_tile_couple['widget']
 
@@ -78,71 +84,75 @@ class TileLayout(QtWidgets.QGridLayout):
         self.widget_tile_couple['widget'].pop(index)
         self.widget_tile_couple['tile'].pop(index)
 
-    def acceptDragAndDrop(self, value):
+    def acceptDragAndDrop(self, value: bool):
         """is the user allowed to drag and drop tiles ?"""
         self.drag_and_drop = value
 
-    def acceptResizing(self, value):
+    def acceptResizing(self, value: bool):
         """is the user allowed to resize tiles ?"""
         self.resizable = value
 
-    def setCursorIdle(self, value):
+    def setCursorIdle(self, value: QtCore.Qt.CursorShape):
         """the default cursor shape on the tiles"""
         self.cursor_idle = value
 
-    def setCursorGrab(self, value):
+    def setCursorGrab(self, value: QtCore.Qt.CursorShape):
         """the cursor shape when the user can grab the tile"""
         self.cursor_grab = value
 
-    def setCursorResizeHorizontal(self, value):
+    def setCursorResizeHorizontal(self, value: QtCore.Qt.CursorShape):
         """the cursor shape when the user can resize the tile horizontally"""
         self.cursor_resize_horizontal = value
 
-    def setCursorResizeVertical(self, value):
+    def setCursorResizeVertical(self, value: QtCore.Qt.CursorShape):
         """the cursor shape when the user can resize the tile vertically"""
         self.cursor_resize_vertical = value
 
-    def rowCount(self):
+    def rowCount(self) -> int:
         """Returns the number of rows"""
         return self.row_number
 
-    def columnCount(self):
+    def columnCount(self) -> int:
         """Returns the number of columns"""
         return self.column_number
 
-    def tileRect(self, row, column):
+    def tileRect(self, row: int, column: int) -> QRect:
         """Returns the geometry of the tile at (row, column)"""
         return self.tile_map[row][column].rect()
 
-    def rowMinimumHeight(self, row=None):
+    def rowMinimumHeight(self, row: int = None) -> int:
         """Returns the minimum height"""
         return self.vertical_span
 
-    def columnMinimumWidth(self, column=None):
+    def columnMinimumWidth(self, column: int = None) -> int:
         """Returns the minimum width"""
         return self.horizontal_span
 
-    def setVerticalSpacing(self, spacing):
+    def setVerticalSpacing(self, spacing: int):
         """Sets the vertical spacing between two tiles"""
         super().setVerticalSpacing(spacing)
         self.__updateAllTiles()
 
-    def setHorizontalSpacing(self, spacing):
+    def setHorizontalSpacing(self, spacing: int):
         """Sets the horizontal spacing between two tiles"""
         super().setHorizontalSpacing(spacing)
         self.__updateAllTiles()
 
-    def setVerticalSpan(self, span):
+    def setVerticalSpan(self, span: int):
         """Sets the vertical span (tile height)"""
         self.vertical_span = span
         self.__setGridMinimalSize()
         self.__updateAllTiles()
 
-    def setHorizontalSpan(self, span):
+    def setHorizontalSpan(self, span: int):
         """Sets the horizontal span (tile width)"""
         self.horizontal_span = span
         self.__setGridMinimalSize()
         self.__updateAllTiles()
+
+    def widgetList(self) -> list:
+        """Returns the widgets currently in the layout"""
+        return self.widget_tile_couple['widget']
 
     def resizeTile(self, direction, from_row, from_column, tile_number):
         """called when a tile is resized"""
@@ -165,10 +175,14 @@ class TileLayout(QtWidgets.QGridLayout):
         row_span += tile_number*dir_y
         from_row += tile_number*(dir_y == -1)
 
-        if tiles_to_merge and increase:
-            self.__mergeTiles(tile, from_row, from_column, row_span, column_span, tiles_to_merge)
-        elif tiles_to_merge:
-            self.__splitTiles(tile, from_row, from_column, row_span, column_span, tiles_to_merge)
+        if tiles_to_merge:
+            if increase:
+                self.__mergeTiles(tile, from_row, from_column, row_span, column_span, tiles_to_merge)
+            else:
+                self.__splitTiles(tile, from_row, from_column, row_span, column_span, tiles_to_merge)
+            index = self.widget_tile_couple['tile'].index(tile)
+            widget = self.widget_tile_couple['widget'][index]
+            self.tileResized.emit(widget, from_row, from_column, row_span, column_span)
 
     def hardSplitTiles(self, from_row, from_column, tiles_to_split):
         """splits the tiles and return the new one at (from_row, from_column)"""

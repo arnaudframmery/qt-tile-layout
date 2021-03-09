@@ -124,7 +124,21 @@ _Returns the geometry of the tile at (row, column)_
 
 - ```verticalSpacing() -> int```
 
-_Returns the vertical spacing between two tiles_ 
+_Returns the vertical spacing between two tiles_
+
+- ```widgetList() -> list```
+
+_Returns the widgets that are currently in the layout_
+
+##### Signals:
+
+- ```tileMoved(QWidget widget, int from_row, int from_column, int to_row, int to_column)```
+
+_Emits when a tile is moved successfully_
+
+- ```tileResized(QWidget widget, int from_row, int from_column, int row_span, int column_span)```
+
+_Emits when a tile is resized successfully_
 
 # Last word
 

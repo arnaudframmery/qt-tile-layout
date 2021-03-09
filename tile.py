@@ -142,13 +142,21 @@ class Tile(QtWidgets.QWidget):
     def dropEvent(self, event):
         """actions to do when a tile is dropped on this one"""
         drop_data = json.loads(event.mimeData().text())
+        widget = self.tile_layout.getWidgetToDrop()
 
         self.tile_layout.addWidget(
-            self.tile_layout.getWidgetToDrop(),
+            widget,
             self.from_row - drop_data['row_offset'],
             self.from_column - drop_data['column_offset'],
             drop_data['row_span'],
             drop_data['column_span']
+        )
+        self.tile_layout.tileMoved.emit(
+            widget,
+            drop_data['from_row'],
+            drop_data['from_column'],
+            self.from_row - drop_data['row_offset'],
+            self.from_column - drop_data['column_offset'],
         )
 
         event.acceptProposedAction()

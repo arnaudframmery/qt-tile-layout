@@ -108,6 +108,8 @@ class MainWindow(QtWidgets.QMainWindow):
         print(f'Layout vertical spacing: {self.tile_layout.verticalSpacing()}')
         # return the horizontal spacing between two tiles
         print(f'Layout horizontal spacing: {self.tile_layout.horizontalSpacing()}')
+        # return the widgets currently in the layout
+        print(f'Number of widget: {len(self.tile_layout.widgetList())}')
 
         # set the vertical spacing between two tiles
         self.tile_layout.setVerticalSpacing(5)
@@ -117,6 +119,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tile_layout.setVerticalSpan(100)
         # set the horizontal span between two tiles
         self.tile_layout.setHorizontalSpan(150)
+
+        # actions to do when a tile is resized
+        self.tile_layout.tileResized.connect(self.__tileHasBeenResized)
+        # actions to do when a tile is moved
+        self.tile_layout.tileMoved.connect(self.__tileHasBeenMoved)
 
         # insert the layout in the window
         self.central_widget = QtWidgets.QWidget()
@@ -139,6 +146,16 @@ class MainWindow(QtWidgets.QMainWindow):
         palette = QPalette()
         palette.setColor(QPalette.Background, QtGui.QColor(*random.choice(possible_colors)))
         return palette
+
+    @staticmethod
+    def __tileHasBeenResized(widget, from_row, from_column, row_span, column_span):
+        print(f'{widget} has been resized and is now at the position ({from_row}, {from_column}) '
+              f'with a span of ({row_span}, {column_span})')
+
+    @staticmethod
+    def __tileHasBeenMoved(widget, from_row, from_column, to_row, to_column):
+        print(f'{widget} has been moved from position ({from_row}, {from_column}) to ({to_row}, {to_column})')
+
 
 
 app = QtWidgets.QApplication(sys.argv)
