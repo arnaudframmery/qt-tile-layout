@@ -91,6 +91,33 @@ class TileLayout(QtWidgets.QGridLayout):
         self.widget_tile_couple['tile'].pop(index)
         self.changeTilesColor('idle')
 
+    def addRows(self, row_number: int):
+        """adds rows at the bottom of the layout"""
+        assert row_number > 0
+        self.setRowStretch(self.row_number, 0)
+
+        for i_row in range(self.row_number, self.row_number + row_number):
+            self.tile_map.append([])
+            for i_column in range(self.column_number):
+                tile = self.__createTile(i_row, i_column)
+                self.tile_map[-1].append(tile)
+
+        self.row_number += row_number
+        self.__setGridMinimalSize()
+
+    def addColumns(self, column_number: int):
+        """adds columns at the right of the layout"""
+        assert column_number > 0
+        self.setColumnStretch(self.column_number, 0)
+
+        for i_row in range(self.row_number):
+            for i_column in range(self.column_number, self.column_number + column_number):
+                tile = self.__createTile(i_row, i_column)
+                self.tile_map[i_row].append(tile)
+
+        self.column_number += column_number
+        self.__setGridMinimalSize()
+
     def acceptDragAndDrop(self, value: bool):
         """is the user allowed to drag and drop tiles ?"""
         self.drag_and_drop = value

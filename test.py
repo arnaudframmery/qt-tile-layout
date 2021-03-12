@@ -132,6 +132,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # actions to do when a tile is moved
         self.tile_layout.tileMoved.connect(self.__tileHasBeenMoved)
 
+        # adds rows at the bottom of the layout
+        self.tile_layout.addRows(1)
+        # adds columns at the right of the layout
+        self.tile_layout.addColumns(1)
+
         # insert the layout in the window
         self.central_widget = QtWidgets.QWidget()
         self.central_widget.setLayout(self.tile_layout)

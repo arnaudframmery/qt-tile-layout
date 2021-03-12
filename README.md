@@ -58,6 +58,14 @@ _Allows or not the drag and drop of tiles in the layout_
 
 _Allows or not the resizing of tiles in the layout_
 
+- ```addcolumns(int column_number)```
+
+_Adds columns at the right of the layout_
+
+- ```addRows(int row_number)```
+
+_Adds rows at the bottom of the layout_
+
 - ```addWidget(QWidget widget, int from_row, int from_column, int row_span, int column_span)```
 
 _Adds the given widget to the layout, spanning multiple rows/columns. The tile will start at fromRow, fromColumn spanning rowSpan rows and columnSpan columns_
