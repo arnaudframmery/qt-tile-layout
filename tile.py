@@ -71,6 +71,11 @@ class Tile(QtWidgets.QWidget):
         """returns True if there is a widget in the tile, else False"""
         return self.filled
 
+    def changeColor(self, color):
+        """Changes the tile background color"""
+        self.setAutoFillBackground(True)
+        self.setPalette(color)
+
     def mouseMoveEvent(self, event):
         """actions to do when the mouse is moved"""
         if not self.filled:
@@ -109,9 +114,13 @@ class Tile(QtWidgets.QWidget):
         elif event.pos().y() > self.height() - self.resize_margin and self.tile_layout.resizable:
             self.lock = (0, 1)  # 'south'
 
+        if self.lock is not None:
+            self.tile_layout.changeTilesColor('resize')
+
         elif self.filled and self.tile_layout.drag_and_drop:
             drag = self.__prepareDropData(event)
             self.__dragAndDropProcess(drag)
+            self.tile_layout.changeTilesColor('idle')
 
     def mouseReleaseEvent(self, event):
         """actions to do when the mouse button is released"""
@@ -132,6 +141,7 @@ class Tile(QtWidgets.QWidget):
         )
 
         self.tile_layout.resizeTile(self.lock, self.from_row, self.from_column, tile_number)
+        self.tile_layout.changeTilesColor('idle')
         self.lock = None
 
     def dragEnterEvent(self, event):
@@ -192,6 +202,7 @@ class Tile(QtWidgets.QWidget):
         self.tile_layout.setWidgetToDrop(self.widget)
         self.tile_layout.removeWidget(self.widget)
         self.setVisible(False)
+        self.tile_layout.changeTilesColor('drag_and_drop')
 
         if drag.exec_() != 2:
             self.__removeWidget()

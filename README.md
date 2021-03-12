@@ -86,6 +86,18 @@ _Returns the number of row in the layout_
 
 _Return the tile height (the name is not very obvious but it is consistent with grid layout)_
 
+- ```setColorDragAndDrop(tuple color)```
+
+_Sets the RGB color of the tiles during drag and drop_
+
+- ```setColorIdle(tuple color)```
+
+_Sets the default RGB color of the tiles_
+
+- ```setColorResize(tuple color)```
+
+_Sets the RGB color of the tiles during resizing_
+
 - ```setCursorGrab(QtCore.Qt.CursorShape value)```
 
 _Changes the cursor shape when it is possible to drag a tile_

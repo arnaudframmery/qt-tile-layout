@@ -67,6 +67,13 @@ class MainWindow(QtWidgets.QMainWindow):
         # set the cursor shape when the user can resize the tile vertically
         self.tile_layout.setCursorResizeVertical(QtCore.Qt.SizeVerCursor)
 
+        # set default tile color
+        self.tile_layout.setColorIdle((240, 240, 240))
+        # set tile color during resize
+        self.tile_layout.setColorResize((211, 211, 211))
+        # set tile color during drag and drop
+        self.tile_layout.setColorDragAndDrop((211, 211, 211))
+
         # add widgets in the tile layout
         for i_row in range(row_number - 2):
             for i_column in range(column_number):
@@ -155,7 +162,6 @@ class MainWindow(QtWidgets.QMainWindow):
     @staticmethod
     def __tileHasBeenMoved(widget, from_row, from_column, to_row, to_column):
         print(f'{widget} has been moved from position ({from_row}, {from_column}) to ({to_row}, {to_column})')
-
 
 
 app = QtWidgets.QApplication(sys.argv)

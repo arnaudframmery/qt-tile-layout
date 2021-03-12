@@ -1,5 +1,6 @@
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import QRect
+from PyQt5.QtGui import QPalette
 from PyQt5.QtWidgets import QWidget
 
 from tile import Tile
@@ -37,6 +38,11 @@ class TileLayout(QtWidgets.QGridLayout):
         self.cursor_grab = QtCore.Qt.OpenHandCursor
         self.cursor_resize_horizontal = QtCore.Qt.SizeHorCursor
         self.cursor_resize_vertical = QtCore.Qt.SizeVerCursor
+        self.color_map = {
+            'drag_and_drop': (211, 211, 211),
+            'idle': (240, 240, 240),
+            'resize': (211, 211, 211),
+        }
 
         self.__setGridMinimalSize()
         self.__createTileMap()
@@ -83,6 +89,7 @@ class TileLayout(QtWidgets.QGridLayout):
         self.hardSplitTiles(from_row, from_column, tiles_to_split)
         self.widget_tile_couple['widget'].pop(index)
         self.widget_tile_couple['tile'].pop(index)
+        self.changeTilesColor('idle')
 
     def acceptDragAndDrop(self, value: bool):
         """is the user allowed to drag and drop tiles ?"""
@@ -107,6 +114,19 @@ class TileLayout(QtWidgets.QGridLayout):
     def setCursorResizeVertical(self, value: QtCore.Qt.CursorShape):
         """the cursor shape when the user can resize the tile vertically"""
         self.cursor_resize_vertical = value
+
+    def setColorIdle(self, color: tuple):
+        """the default tile color"""
+        self.color_map['idle'] = color
+        self.changeTilesColor('idle')
+
+    def setColorResize(self, color: tuple):
+        """the tile color during resizing"""
+        self.color_map['resize'] = color
+
+    def setColorDragAndDrop(self, color: tuple):
+        """the tile color during drag and drop"""
+        self.color_map['drag_and_drop'] = color
 
     def rowCount(self) -> int:
         """Returns the number of rows"""
@@ -218,6 +238,14 @@ class TileLayout(QtWidgets.QGridLayout):
     def setWidgetToDrop(self, widget):
         """sets the widget that the user is dragging"""
         self.widget_to_drop = widget
+
+    def changeTilesColor(self, color_choice):
+        palette = QPalette()
+        palette.setColor(QPalette.Background, QtGui.QColor(*self.color_map[color_choice]))
+        for row in range(self.row_number):
+            for column in range(self.column_number):
+                if not self.tile_map[row][column].isFilled():
+                    self.tile_map[row][column].changeColor(palette)
 
     def __mergeTiles(self, tile, from_row, from_column, row_span, column_span, tiles_to_merge):
         """merges the tiles_to_merge with tile"""
