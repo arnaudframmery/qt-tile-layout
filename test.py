@@ -136,6 +136,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tile_layout.addRows(1)
         # adds columns at the right of the layout
         self.tile_layout.addColumns(1)
+        # removes rows from the layout bottom
+        self.tile_layout.removeRows(1)
+        # removes columns from the layout right
+        self.tile_layout.removeColumns(1)
 
         # insert the layout in the window
         self.central_widget = QtWidgets.QWidget()

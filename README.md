@@ -82,6 +82,14 @@ _Return the tile width (the name is not very obvious but it is consistent with g
 
 _Returns the horizontal spacing between two tiles_ 
 
+- ```removecolumns(int column_number)```
+
+_Removes columns at the right of the layout, raises an error if a widget is in the target area_
+
+- ```removeRows(int row_number)```
+
+_Adds rows at the bottom of the layout, raises an error if a widget is in the target area_
+
 - ```removeWidget(QWidget widget)```
 
 _Removes the given widget from the layout_

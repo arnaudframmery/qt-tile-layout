@@ -118,6 +118,36 @@ class TileLayout(QtWidgets.QGridLayout):
         self.column_number += column_number
         self.__setGridMinimalSize()
 
+    def removeRows(self, row_number: int):
+        """removes rows from the layout bottom"""
+        assert self.isAreaEmpty(self.row_number - row_number, 0, row_number, self.column_number)
+
+        for row in range(self.row_number - row_number, self.row_number):
+            for column in range(self.column_number):
+                super().removeWidget(self.tile_map[row][column])
+
+            self.setRowMinimumHeight(row, 0)
+            self.setRowStretch(row, 0)
+
+        self.row_number -= row_number
+        self.tile_map = self.tile_map[:self.row_number]
+        self.setRowStretch(self.row_number, 1)
+
+    def removeColumns(self, column_number: int):
+        """removes columns from the layout right"""
+        assert self.isAreaEmpty(0, self.column_number - column_number, self.row_number, column_number)
+
+        for column in range(self.column_number - column_number, self.column_number):
+            for row in range(self.row_number):
+                super().removeWidget(self.tile_map[row][column])
+
+            self.setColumnMinimumWidth(column, 0)
+            self.setColumnStretch(column, 0)
+
+        self.column_number -= column_number
+        self.tile_map = [a_row[:self.column_number] for a_row in self.tile_map]
+        self.setColumnStretch(self.column_number, 1)
+
     def acceptDragAndDrop(self, value: bool):
         """is the user allowed to drag and drop tiles ?"""
         self.drag_and_drop = value
