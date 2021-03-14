@@ -25,6 +25,8 @@ class TileLayout(QtWidgets.QGridLayout):
         self.column_number = column_number
         self.vertical_span = vertical_span
         self.horizontal_span = horizontal_span
+        self.min_vertical_span = vertical_span
+        self.min_horizontal_span = horizontal_span
 
         # logic parameters
         self.drag_and_drop = True
@@ -44,7 +46,8 @@ class TileLayout(QtWidgets.QGridLayout):
             'resize': (211, 211, 211),
         }
 
-        self.__setGridMinimalSize()
+        self.setRowStretch(self.row_number, 1)
+        self.setColumnStretch(self.column_number, 1)
         self.__createTileMap()
 
     def addWidget(self, widget: QWidget, from_row: int, from_column: int, row_span: int = 1, column_span: int = 1):
@@ -103,7 +106,7 @@ class TileLayout(QtWidgets.QGridLayout):
                 self.tile_map[-1].append(tile)
 
         self.row_number += row_number
-        self.__setGridMinimalSize()
+        self.setRowStretch(self.row_number, 1)
 
     def addColumns(self, column_number: int):
         """adds columns at the right of the layout"""
@@ -116,7 +119,7 @@ class TileLayout(QtWidgets.QGridLayout):
                 self.tile_map[i_row].append(tile)
 
         self.column_number += column_number
-        self.__setGridMinimalSize()
+        self.setColumnStretch(self.column_number, 1)
 
     def removeRows(self, row_number: int):
         """removes rows from the layout bottom"""
@@ -131,7 +134,6 @@ class TileLayout(QtWidgets.QGridLayout):
 
         self.row_number -= row_number
         self.tile_map = self.tile_map[:self.row_number]
-        self.setRowStretch(self.row_number, 1)
 
     def removeColumns(self, column_number: int):
         """removes columns from the layout right"""
@@ -146,7 +148,6 @@ class TileLayout(QtWidgets.QGridLayout):
 
         self.column_number -= column_number
         self.tile_map = [a_row[:self.column_number] for a_row in self.tile_map]
-        self.setColumnStretch(self.column_number, 1)
 
     def acceptDragAndDrop(self, value: bool):
         """is the user allowed to drag and drop tiles ?"""
@@ -197,13 +198,39 @@ class TileLayout(QtWidgets.QGridLayout):
         """Returns the geometry of the tile at (row, column)"""
         return self.tile_map[row][column].rect()
 
-    def rowMinimumHeight(self, row: int = None) -> int:
+    def rowsMinimumHeight(self) -> int:
         """Returns the minimum height"""
-        return self.vertical_span
+        return self.min_vertical_span
 
-    def columnMinimumWidth(self, column: int = None) -> int:
+    def columnsMinimumWidth(self) -> int:
         """Returns the minimum width"""
-        return self.horizontal_span
+        return self.min_horizontal_span
+
+    def setRowsMinimumHeight(self, height: int):
+        """Sets the minimum tiles height"""
+        self.min_vertical_span = height
+        if self.min_vertical_span > self.vertical_span:
+            self.vertical_span = self.min_vertical_span
+            self.__updateAllTiles()
+
+    def setColumnsMinimumWidth(self, width: int):
+        """Sets the minimum tiles width"""
+        self.min_horizontal_span = width
+        if self.min_horizontal_span > self.horizontal_span:
+            self.horizontal_span = self.min_horizontal_span
+            self.__updateAllTiles()
+
+    def setRowsHeight(self, height: int):
+        """Sets the tiles height"""
+        assert self.min_vertical_span <= height
+        self.vertical_span = height
+        self.__updateAllTiles()
+
+    def setColumnsWidth(self, width: int):
+        """Sets the tiles width"""
+        assert self.min_horizontal_span <= width
+        self.horizontal_span = width
+        self.__updateAllTiles()
 
     def setVerticalSpacing(self, spacing: int):
         """Sets the vertical spacing between two tiles"""
@@ -213,18 +240,6 @@ class TileLayout(QtWidgets.QGridLayout):
     def setHorizontalSpacing(self, spacing: int):
         """Sets the horizontal spacing between two tiles"""
         super().setHorizontalSpacing(spacing)
-        self.__updateAllTiles()
-
-    def setVerticalSpan(self, span: int):
-        """Sets the vertical span (tile height)"""
-        self.vertical_span = span
-        self.__setGridMinimalSize()
-        self.__updateAllTiles()
-
-    def setHorizontalSpan(self, span: int):
-        """Sets the horizontal span (tile width)"""
-        self.horizontal_span = span
-        self.__setGridMinimalSize()
         self.__updateAllTiles()
 
     def widgetList(self) -> list:
@@ -297,12 +312,31 @@ class TileLayout(QtWidgets.QGridLayout):
         self.widget_to_drop = widget
 
     def changeTilesColor(self, color_choice):
+        """changes the color of all tiles"""
         palette = QPalette()
         palette.setColor(QPalette.Background, QtGui.QColor(*self.color_map[color_choice]))
         for row in range(self.row_number):
             for column in range(self.column_number):
                 if not self.tile_map[row][column].isFilled():
                     self.tile_map[row][column].changeColor(palette)
+
+    def updateGlobalSize(self, new_size: QtGui.QResizeEvent):
+        """update the size of the layout"""
+        vertical_margins = self.contentsMargins().top() + self.contentsMargins().bottom()
+        vertical_span = int(
+            (new_size.size().height() - (self.row_number - 1)*self.verticalSpacing() - vertical_margins)
+            // self.row_number
+        )
+
+        horizontal_margins = self.contentsMargins().left() + self.contentsMargins().right()
+        horizontal_span = int(
+            (new_size.size().width() - (self.column_number - 1)*self.horizontalSpacing() - horizontal_margins)
+            // self.column_number
+        )
+
+        self.vertical_span = max(vertical_span, self.min_vertical_span)
+        self.horizontal_span = max(horizontal_span, self.min_horizontal_span)
+        self.__updateAllTiles()
 
     def __mergeTiles(self, tile, from_row, from_column, row_span, column_span, tiles_to_merge):
         """merges the tiles_to_merge with tile"""
@@ -332,7 +366,7 @@ class TileLayout(QtWidgets.QGridLayout):
             row_span,
             column_span,
             self.vertical_span,
-            self.horizontal_span
+            self.horizontal_span,
         )
         super().addWidget(tile, from_row, from_column, row_span, column_span)
 
@@ -397,7 +431,7 @@ class TileLayout(QtWidgets.QGridLayout):
                 for row in range(row_span):
                     tiles_to_check.append((from_row + row, from_column + column_delta))
                     if self.tile_map[from_row + row][from_column + column_delta].isFilled():
-                        return tile_number_available, self.flattenList(tiles_to_merge)
+                        return tile_number_available, self.__flattenList(tiles_to_merge)
                 tile_number_available += dir_x
                 tiles_to_merge.append(tiles_to_check)
 
@@ -409,11 +443,11 @@ class TileLayout(QtWidgets.QGridLayout):
                 for column in range(column_span):
                     tiles_to_check.append((from_row + row_delta, from_column + column))
                     if self.tile_map[from_row + row_delta][from_column + column].isFilled():
-                        return tile_number_available, self.flattenList(tiles_to_merge)
+                        return tile_number_available, self.__flattenList(tiles_to_merge)
                 tile_number_available += dir_y
                 tiles_to_merge.append(tiles_to_check)
 
-        return tile_number_available, self.flattenList(tiles_to_merge)
+        return tile_number_available, self.__flattenList(tiles_to_merge)
 
     def __createTileMap(self):
         """Creates a map to be able to locate each tile on the grid"""
@@ -422,15 +456,6 @@ class TileLayout(QtWidgets.QGridLayout):
             for i_column in range(self.column_number):
                 tile = self.__createTile(i_row, i_column)
                 self.tile_map[-1].append(tile)
-
-    def __setGridMinimalSize(self):
-        """Sets the grid/tiles minimum size"""
-        for i in range(self.row_number):
-            self.setRowMinimumHeight(i, self.vertical_span)
-        self.setRowStretch(self.row_number, 1)
-        for i in range(self.column_number):
-            self.setColumnMinimumWidth(i, self.horizontal_span)
-        self.setColumnStretch(self.column_number, 1)
 
     def __updateAllTiles(self):
         """Forces the tiles to update their geometry"""
@@ -442,6 +467,6 @@ class TileLayout(QtWidgets.QGridLayout):
                 )
 
     @staticmethod
-    def flattenList(to_flatten):
+    def __flattenList(to_flatten):
         """returns a 1D list given a 2D list"""
         return [item for a_list in to_flatten for item in a_list]

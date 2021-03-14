@@ -42,15 +42,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
         row_number = 6
         column_number = 4
+        vertical_span = 100
+        horizontal_span = 150
+        spacing = 5
+        static_layout = False
 
         # create the tile layout
         self.tile_layout = TileLayout(
             row_number=row_number,
             column_number=column_number,
-            vertical_span=100,
-            horizontal_span=150,
-            vertical_spacing=5,
-            horizontal_spacing=5,
+            vertical_span=vertical_span,
+            horizontal_span=horizontal_span,
+            vertical_spacing=spacing,
+            horizontal_spacing=spacing,
         )
 
         # allow the user to drag and drop tiles or not
@@ -108,9 +112,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # return the geometry of a specific tile
         print(f'One tile geometry: {self.tile_layout.tileRect(row_number - 1, 1)}')
         # return the tile height
-        print(f'Tile height: {self.tile_layout.rowMinimumHeight()}')
+        print(f'Tile height: {self.tile_layout.rowsMinimumHeight()}')
         # return the tile width
-        print(f'Tile width: {self.tile_layout.columnMinimumWidth()}')
+        print(f'Tile width: {self.tile_layout.columnsMinimumWidth()}')
         # return the vertical spacing between two tiles
         print(f'Layout vertical spacing: {self.tile_layout.verticalSpacing()}')
         # return the horizontal spacing between two tiles
@@ -122,10 +126,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tile_layout.setVerticalSpacing(5)
         # set the horizontal spacing between two tiles
         self.tile_layout.setHorizontalSpacing(5)
-        # set the vertical span between two tiles
-        self.tile_layout.setVerticalSpan(100)
-        # set the horizontal span between two tiles
-        self.tile_layout.setHorizontalSpan(150)
+        # set the minimum tiles height
+        self.tile_layout.setRowsMinimumHeight(100)
+        # set the minimum tiles width
+        self.tile_layout.setColumnsMinimumWidth(150)
+        # set the tiles height
+        self.tile_layout.setRowsHeight(100)
+        # set the tiles width
+        self.tile_layout.setColumnsWidth(150)
 
         # actions to do when a tile is resized
         self.tile_layout.tileResized.connect(self.__tileHasBeenResized)
@@ -143,8 +151,30 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # insert the layout in the window
         self.central_widget = QtWidgets.QWidget()
+        self.central_widget.setContentsMargins(0, 0, 0, 0)
         self.central_widget.setLayout(self.tile_layout)
-        self.setCentralWidget(self.central_widget)
+
+        if static_layout:
+            self.setCentralWidget(self.central_widget)
+
+        else:
+            self.scroll = QtWidgets.QScrollArea()
+            self.scroll.setWidgetResizable(True)
+            self.scroll.setContentsMargins(0, 0, 0, 0)
+            self.scroll.setWidget(self.central_widget)
+            self.setCentralWidget(self.scroll)
+            self.scroll.resizeEvent = self.centralWidgetResize
+
+            # if you are not in static layout mode, think to change the scrollArea minimum height and width if you
+            # change tiles minimum height or width
+            vertical_margins = self.tile_layout.contentsMargins().top() + self.tile_layout.contentsMargins().bottom()
+            horizontal_margins = self.tile_layout.contentsMargins().left() + self.tile_layout.contentsMargins().right()
+            self.scroll.setMinimumHeight(
+                row_number * vertical_span + (row_number - 1) * spacing + vertical_margins + 2
+            )
+            self.scroll.setMinimumWidth(
+                column_number * horizontal_span + (column_number - 1) * spacing + horizontal_margins + 2
+            )
 
     def __spawnWidget(self):
         """spawns a little colored widget with text"""
@@ -171,6 +201,9 @@ class MainWindow(QtWidgets.QMainWindow):
     @staticmethod
     def __tileHasBeenMoved(widget, from_row, from_column, to_row, to_column):
         print(f'{widget} has been moved from position ({from_row}, {from_column}) to ({to_row}, {to_column})')
+
+    def centralWidgetResize(self, a0):
+        self.tile_layout.updateGlobalSize(a0)
 
 
 app = QtWidgets.QApplication(sys.argv)

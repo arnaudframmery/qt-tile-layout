@@ -10,8 +10,8 @@ class Tile(QtWidgets.QWidget):
     The basic component of a tileLayout
     """
 
-    def __init__(self, tile_layout, from_row, from_column, row_span, column_span, vertical_span=100,
-                 horizontal_span=100, *args, **kwargs):
+    def __init__(self, tile_layout, from_row, from_column, row_span, column_span, vertical_span,
+                 horizontal_span, *args, **kwargs):
         super(Tile, self).__init__(*args, **kwargs)
         self.tile_layout = tile_layout
         self.from_row = from_row
@@ -233,7 +233,7 @@ class Tile(QtWidgets.QWidget):
         self.filled = False
 
     def __updateSizeLimit(self):
-        """refreshs the tile size limit"""
+        """refreshes the tile size limit"""
         self.setFixedHeight(
             self.row_span * self.vertical_span + (self.row_span - 1) * self.tile_layout.verticalSpacing()
         )
