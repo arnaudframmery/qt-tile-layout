@@ -24,12 +24,12 @@ We also give the vertical and horizontal spawn in pixel
 
 ```python
 layout = QTileLayout(
-    row_number=8,
-    column_number=5,
-    vertical_spawn=100,
-    horizontal_span=150,
-    vertical_spacing=5,
-    horizontal_spacing=5,
+    rowNumber=8,
+    columnNumber=5,
+    verticalSpawn=100,
+    horizontalSpan=150,
+    verticalSpacing=5,
+    horizontalSpacing=5,
 )
 ```
 
@@ -38,10 +38,10 @@ We can now add a widget in a specific position: it's the same as the grid layout
 ```python
 layout.addWidget(
     widget=QtWidgets.QLabel('Hello world'),
-    from_row=3,
-    from_column=2,
-    row_span=1,
-    column_span=2
+    fromRow=3,
+    fromColumn=2,
+    rowSpan=1,
+    columnSpan=2
 )
 ```
 
@@ -49,7 +49,7 @@ Finally, if you put your layout into a window, you will be able to drag and drop
 
 # Documentation
 
-```QTileLayout(int from_row, int from_column, int row_span, int column_span)```
+```QTileLayout(int fromRow, int fromColumn, int rowSpan, int columnSpan)```
 
 _Constructs a new tile layout_
 
@@ -65,17 +65,17 @@ _Allows or not the drag and drop of tiles in the layout_
 _Allows or not the resizing of tiles in the layout_  
 &nbsp;
 
-- ```addcolumns(int column_number)```
+- ```addcolumns(int columnNumber)```
 
 _Adds columns at the right of the layout_  
 &nbsp;
 
-- ```addRows(int row_number)```
+- ```addRows(int rowNumber)```
 
 _Adds rows at the bottom of the layout_  
 &nbsp;
 
-- ```addWidget(QWidget widget, int from_row, int from_column, int row_span, int column_span)```
+- ```addWidget(QWidget widget, int fromRow, int fromColumn, int rowSpan, int columnSpan)```
 
 _Adds the given widget to the layout, spanning multiple rows/columns. The tile will start at fromRow, fromColumn spanning rowSpan rows and columnSpan columns_  
 &nbsp;
@@ -95,12 +95,12 @@ _Returns the minimal tile width of span one_
 _Returns the horizontal spacing between two tiles_  
 &nbsp;
 
-- ```removecolumns(int column_number)```
+- ```removecolumns(int columnNumber)```
 
 _Removes columns at the right of the layout, raises an error if a widget is in the target area_  
 &nbsp;
 
-- ```removeRows(int row_number)```
+- ```removeRows(int rowNumber)```
 
 _Adds rows at the bottom of the layout, raises an error if a widget is in the target area_  
 &nbsp;
@@ -202,12 +202,12 @@ _Returns the widgets that are currently in the layout_
 
 ##### Signals:
 
-- ```tileMoved(QWidget widget, int from_row, int from_column, int to_row, int to_column)```
+- ```tileMoved(QWidget widget, int fromRow, int fromColumn, int toRow, int toColumn)```
 
 _Emits when a tile is moved successfully_  
 &nbsp;
 
-- ```tileResized(QWidget widget, int from_row, int from_column, int row_span, int column_span)```
+- ```tileResized(QWidget widget, int fromRow, int fromColumn, int rowSpan, int columnSpan)```
 
 _Emits when a tile is resized successfully_  
 &nbsp;

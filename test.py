@@ -45,16 +45,16 @@ class MainWindow(QtWidgets.QMainWindow):
         vertical_span = 100
         horizontal_span = 150
         spacing = 5
-        static_layout = False
+        static_layout = True
 
         # create the tile layout
         self.tile_layout = QTileLayout(
-            row_number=row_number,
-            column_number=column_number,
-            vertical_span=vertical_span,
-            horizontal_span=horizontal_span,
-            vertical_spacing=spacing,
-            horizontal_spacing=spacing,
+            rowNumber=row_number,
+            columnNumber=column_number,
+            verticalSpan=vertical_span,
+            horizontalSpan=horizontal_span,
+            verticalSpacing=spacing,
+            horizontalSpacing=spacing,
         )
 
         # allow the user to drag and drop tiles or not
@@ -83,25 +83,25 @@ class MainWindow(QtWidgets.QMainWindow):
             for i_column in range(column_number):
                 self.tile_layout.addWidget(
                     widget=self.__spawnWidget(),
-                    from_row=i_row,
-                    from_column=i_column,
+                    fromRow=i_row,
+                    fromColumn=i_column,
                 )
         self.tile_layout.addWidget(
             widget=self.__spawnWidget(),
-            from_row=row_number - 2,
-            from_column=1,
-            row_span=2,
-            column_span=2
+            fromRow=row_number - 2,
+            fromColumn=1,
+            rowSpan=2,
+            columnSpan=2
         )
 
         # remove a widget from the tile layout
         last_widget = self.__spawnWidget()
         self.tile_layout.addWidget(
             widget=last_widget,
-            from_row=row_number - 1,
-            from_column=0,
-            row_span=1,
-            column_span=1
+            fromRow=row_number - 1,
+            fromColumn=0,
+            rowSpan=1,
+            columnSpan=1
         )
         self.tile_layout.removeWidget(last_widget)
 
@@ -163,7 +163,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.scroll.setContentsMargins(0, 0, 0, 0)
             self.scroll.setWidget(self.central_widget)
             self.setCentralWidget(self.scroll)
-            self.scroll.resizeEvent = self.centralWidgetResize
+            self.scroll.resizeEvent = self.__centralWidgetResize
 
             # if you are not in static layout mode, think to change the scrollArea minimum height and width if you
             # change tiles minimum height or width
@@ -202,7 +202,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __tileHasBeenMoved(widget, from_row, from_column, to_row, to_column):
         print(f'{widget} has been moved from position ({from_row}, {from_column}) to ({to_row}, {to_column})')
 
-    def centralWidgetResize(self, a0):
+    def __centralWidgetResize(self, a0):
         self.tile_layout.updateGlobalSize(a0)
 
 
