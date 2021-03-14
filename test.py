@@ -3,7 +3,7 @@ import sys
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QPalette, QFont
 
-from tile_layout import TileLayout
+from QTileLayout import QTileLayout
 
 
 possible_text = [
@@ -48,7 +48,7 @@ class MainWindow(QtWidgets.QMainWindow):
         static_layout = False
 
         # create the tile layout
-        self.tile_layout = TileLayout(
+        self.tile_layout = QTileLayout(
             row_number=row_number,
             column_number=column_number,
             vertical_span=vertical_span,

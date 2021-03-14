@@ -1,6 +1,6 @@
 # qt-tile-layout
 
-A tile layout for PyQt where you can put any widget in a tile. The user is then able to drag and drop the tiles and resize them !
+A tile layout for PyQt where you can put any widget in a tile. The user is then able to drag and drop the tiles and resize them
 
 ![](showoff.gif)
 
@@ -16,14 +16,14 @@ Moreover, you can change the value of ```static_layout``` variable to ```False``
 First of all, the import statement
 
 ```python
-from tile_layout import TileLayout
+from QTileLayout import QTileLayout
 ```
 
 Then, let's create a tile layout with 8 rows and 5 columns.  
 We also give the vertical and horizontal spawn in pixel
 
 ```python
-layout = TileLayout(
+layout = QTileLayout(
     row_number=8,
     column_number=5,
     vertical_spawn=100,
@@ -49,7 +49,7 @@ Finally, if you put your layout into a window, you will be able to drag and drop
 
 # Documentation
 
-```TileLayout(int from_row, int from_column, int row_span, int column_span)```
+```QTileLayout(int from_row, int from_column, int row_span, int column_span)```
 
 _Constructs a new tile layout_
 

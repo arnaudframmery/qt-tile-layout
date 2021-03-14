@@ -3,10 +3,10 @@ from PyQt5.QtCore import QRect
 from PyQt5.QtGui import QPalette
 from PyQt5.QtWidgets import QWidget
 
-from tile import Tile
+from .tile import Tile
 
 
-class TileLayout(QtWidgets.QGridLayout):
+class QTileLayout(QtWidgets.QGridLayout):
     """
     A layout where the user can drag and drop widgets and resize them
     """
@@ -16,7 +16,7 @@ class TileLayout(QtWidgets.QGridLayout):
 
     def __init__(self, row_number, column_number, vertical_span, horizontal_span, vertical_spacing=5,
                  horizontal_spacing=5, *args, **kwargs):
-        super(TileLayout, self).__init__(*args, **kwargs)
+        super(QTileLayout, self).__init__(*args, **kwargs)
 
         # geometric parameters
         super().setVerticalSpacing(vertical_spacing)
