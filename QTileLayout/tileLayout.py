@@ -315,10 +315,14 @@ class QTileLayout(QtWidgets.QGridLayout):
         """changes the color of all tiles"""
         palette = QPalette()
         palette.setColor(QPalette.Background, QtGui.QColor(*self.colorMap[colorChoice]))
+        palette_idle = QPalette()
+        palette_idle.setColor(QPalette.Background, QtGui.QColor(*self.colorMap['idle']))
         for row in range(self.rowNumber):
             for column in range(self.columnNumber):
                 if not self.tileMap[row][column].isFilled():
                     self.tileMap[row][column].changeColor(palette)
+                else:
+                    self.tileMap[row][column].changeColor(palette_idle)
 
     def updateGlobalSize(self, newSize: QtGui.QResizeEvent):
         """update the size of the layout"""
