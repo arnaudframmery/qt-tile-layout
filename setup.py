@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="pyqt5-tile-layout",
-    version="0.1.1",
+    version="0.1.2",
     author="Arnaud Frammery",
     author_email="arnaud.frammery@gmail.com",
     description="A tile layout for PyQt5",
@@ -12,5 +12,5 @@ setup(
     license="GPL3",
     url="https://github.com/arnaudframmery/qt-tile-layout",
     packages=["QTileLayout"],
-    install_requires=["PyQt5"],
+    install_requires=["PyQt5~=5.15.4"],
 )

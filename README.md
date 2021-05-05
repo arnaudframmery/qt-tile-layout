@@ -6,7 +6,7 @@ A tile layout for PyQt where you can put any widget in a tile. The user is then 
 
 # Quick example
 
-Just launch the ```test.py``` script to have a first look (be sure to have installed PyQt5).
+Just launch the ```test.py``` script to have a first look (be sure to have installed PyQt5 from the `requirements.txt` file).
 You can have an overview of how to use the different methods in this script.  
 
 Moreover, you can change the value of ```static_layout``` variable to ```False``` to experiment a tile layout where the tile sizes are dynamics with the parent widget size (like a classic layout)
