@@ -287,6 +287,7 @@ class QTileLayout(QtWidgets.QGridLayout):
 
         for tile in tilesToRecycle:
             super().removeWidget(tile)
+            tile.deleteLater()
 
         tile = self.tileMap[fromRow][fromColumn]
         super().addWidget(tile, fromRow, fromColumn)
@@ -346,6 +347,7 @@ class QTileLayout(QtWidgets.QGridLayout):
         """merges the tilesToMerge with tile"""
         for row, column in tilesToMerge:
             super().removeWidget(self.tileMap[row][column])
+            self.tileMap[row][column].deleteLater()
             self.tileMap[row][column] = tile
 
         super().removeWidget(tile)
