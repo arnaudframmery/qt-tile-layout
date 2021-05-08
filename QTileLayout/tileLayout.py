@@ -128,7 +128,7 @@ class QTileLayout(QtWidgets.QGridLayout):
         for row in range(self.rowNumber - rowNumber, self.rowNumber):
             for column in range(self.columnNumber):
                 super().removeWidget(self.tileMap[row][column])
-
+                self.tileMap[row][column].deleteLater()
             self.setRowMinimumHeight(row, 0)
             self.setRowStretch(row, 0)
 
@@ -142,6 +142,7 @@ class QTileLayout(QtWidgets.QGridLayout):
         for column in range(self.columnNumber - columnNumber, self.columnNumber):
             for row in range(self.rowNumber):
                 super().removeWidget(self.tileMap[row][column])
+                self.tileMap[row][column].deleteLater()
 
             self.setColumnMinimumWidth(column, 0)
             self.setColumnStretch(column, 0)
@@ -287,6 +288,7 @@ class QTileLayout(QtWidgets.QGridLayout):
 
         for tile in tilesToRecycle:
             super().removeWidget(tile)
+            tile.deleteLater()
 
         tile = self.tileMap[fromRow][fromColumn]
         super().addWidget(tile, fromRow, fromColumn)
@@ -346,6 +348,7 @@ class QTileLayout(QtWidgets.QGridLayout):
         """merges the tilesToMerge with tile"""
         for row, column in tilesToMerge:
             super().removeWidget(self.tileMap[row][column])
+            self.tileMap[row][column].deleteLater()
             self.tileMap[row][column] = tile
 
         super().removeWidget(tile)
