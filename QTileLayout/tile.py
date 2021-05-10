@@ -1,5 +1,6 @@
+from json import JSONDecodeError
 from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtCore import Qt, QMimeData
+from PyQt5.QtCore import Qt, QMimeData, QByteArray
 from PyQt5.QtGui import QDrag
 from PyQt5.QtWidgets import QVBoxLayout
 import json
@@ -146,12 +147,12 @@ class Tile(QtWidgets.QWidget):
 
     def dragEnterEvent(self, event):
         """checks if a tile can be drop on this one"""
-        if self.tileLayout.dragAndDrop and self.__isDropPossible(event):
+        if self.tileLayout.dragAndDrop and event.mimeData().hasFormat('TileData') and self.__isDropPossible(event):
             event.acceptProposedAction()
 
     def dropEvent(self, event):
         """actions to do when a tile is dropped on this one"""
-        dropData = json.loads(event.mimeData().text())
+        dropData = json.loads(event.mimeData().data('TileData').data())
         widget = self.tileLayout.getWidgetToDrop()
 
         self.tileLayout.addWidget(
@@ -185,7 +186,8 @@ class Tile(QtWidgets.QWidget):
             'column_offset': event.pos().x() // (self.horizontalSpan + self.tileLayout.horizontalSpacing()),
         }
         dataToText = json.dumps(data)
-        dropData.setText(dataToText)
+        dropData.setData('TileData', QByteArray(dataToText.encode()))
+        # dropData.setText(dataToText)
         dragIcon = self.widget.grab()
 
         drag.setPixmap(dragIcon)
@@ -218,7 +220,11 @@ class Tile(QtWidgets.QWidget):
 
     def __isDropPossible(self, event):
         """checks if this tile can accept the drop"""
-        dropData = json.loads(event.mimeData().text())
+        try:
+            dropData = json.loads(event.mimeData().data('TileData').data())
+        except JSONDecodeError:
+            return False
+
         return self.tileLayout.isAreaEmpty(
             self.fromRow - dropData['row_offset'],
             self.fromColumn - dropData['column_offset'],
