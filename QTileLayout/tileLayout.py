@@ -2,6 +2,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtCore import QRect
 from PyQt5.QtGui import QPalette
 from PyQt5.QtWidgets import QWidget
+import uuid
 
 from .tile import Tile
 
@@ -34,6 +35,7 @@ class QTileLayout(QtWidgets.QGridLayout):
         self.widgetToDrop = None
         self.tileMap = []
         self.widgetTileCouple = {'widget': [], 'tile': []}
+        self.id = str(uuid.uuid4())
 
         # design parameters
         self.cursorIdle = QtCore.Qt.ArrowCursor

@@ -178,6 +178,7 @@ class Tile(QtWidgets.QWidget):
 
         dropData = QMimeData()
         data = {
+            'id': self.tileLayout.id,
             'from_row': self.fromRow,
             'from_column': self.fromColumn,
             'row_span': self.rowSpan,
@@ -223,6 +224,9 @@ class Tile(QtWidgets.QWidget):
         try:
             dropData = json.loads(event.mimeData().data('TileData').data())
         except JSONDecodeError:
+            return False
+
+        if dropData['id'] != self.tileLayout.id:
             return False
 
         return self.tileLayout.isAreaEmpty(
