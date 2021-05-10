@@ -12,5 +12,5 @@ setup(
     license="GPL3",
     url="https://github.com/arnaudframmery/qt-tile-layout",
     packages=["QTileLayout"],
-    install_requires=["PyQt5~=5.15.4"],
+    install_requires=["PyQt5~=5.12"],
 )
