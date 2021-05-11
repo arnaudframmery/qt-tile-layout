@@ -188,7 +188,6 @@ class Tile(QtWidgets.QWidget):
         }
         dataToText = json.dumps(data)
         dropData.setData('TileData', QByteArray(dataToText.encode()))
-        # dropData.setText(dataToText)
         dragIcon = self.widget.grab()
 
         drag.setPixmap(dragIcon)
