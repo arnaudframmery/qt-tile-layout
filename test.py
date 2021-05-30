@@ -29,6 +29,18 @@ possible_colors = [
 ]
 
 
+class Label(QtWidgets.QLabel):
+
+    def focusInEvent(self, event):
+        print("WIDGET FOCUS IN EVENT", self)
+
+    def focusOutEvent(self, event):
+        print("WIDGET FOCUS OUT EVENT", self)
+
+    def keyPressEvent(self, ev: QtGui.QKeyEvent):
+        print("WIDGET KEY PRESSED", self)
+
+
 class MainWindow(QtWidgets.QMainWindow):
     """
     creates a window and spawns some widgets to be able to test the tile layout
@@ -178,7 +190,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __spawnWidget(self):
         """spawns a little colored widget with text"""
-        label = QtWidgets.QLabel(self)
+        label = Label(self)
         label.setText(random.choice(possible_text))
         label.setFont(self.font)
         label.setAlignment(QtCore.Qt.AlignCenter)

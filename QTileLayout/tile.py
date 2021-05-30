@@ -123,6 +123,9 @@ class Tile(QtWidgets.QWidget):
             self.__dragAndDropProcess(drag)
             self.tileLayout.changeTilesColor('idle')
 
+        if self.filled:
+            self.widget.setFocus()
+
     def mouseReleaseEvent(self, event):
         """actions to do when the mouse button is released"""
         if self.lock is None:
@@ -208,13 +211,15 @@ class Tile(QtWidgets.QWidget):
 
         if drag.exec_() != 2:
             self.__removeWidget()
+            widget = self.tileLayout.getWidgetToDrop()
             self.tileLayout.addWidget(
-                self.tileLayout.getWidgetToDrop(),
+                widget,
                 self.fromRow,
                 self.fromColumn,
                 previousRowSpan,
                 previousColumnSpan
             )
+            widget.setFocus()
 
         self.setVisible(True)
 
