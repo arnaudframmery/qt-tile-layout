@@ -30,6 +30,10 @@ possible_colors = [
 
 
 class Label(QtWidgets.QLabel):
+    """
+    Label with some logs about focus
+    => the last widget that has been resized or dragged and dropped should have the focus
+    """
 
     def focusInEvent(self, event):
         print("WIDGET FOCUS IN EVENT", self)
