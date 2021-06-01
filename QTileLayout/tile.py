@@ -232,7 +232,8 @@ class Tile(QtWidgets.QWidget):
             self.fromRow - dropData['row_offset'],
             self.fromColumn - dropData['column_offset'],
             dropData['row_span'],
-            dropData['column_span']
+            dropData['column_span'],
+            color=True
         )
 
     def __removeWidget(self):

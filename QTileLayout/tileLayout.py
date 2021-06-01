@@ -191,7 +191,7 @@ class QTileLayout(QtWidgets.QGridLayout):
         self.colorMap['drag_and_drop'] = color
 
     def setColorEmptyCheck(self, color: tuple):
-        """the tile color during if empty during move"""
+        """the tile color, if empty, during drag and drop"""
         self.colorMap['empty_check'] = color
 
     def rowCount(self) -> int:
@@ -301,16 +301,17 @@ class QTileLayout(QtWidgets.QGridLayout):
         super().addWidget(tile, fromRow, fromColumn)
         return tile
 
-    def isAreaEmpty(self, fromRow, fromColumn, rowSpan, columnSpan):
+    def isAreaEmpty(self, fromRow, fromColumn, rowSpan, columnSpan, color=False):
         """checks if the given space is free from widgets"""
-        self.changeTilesColor('resize')
+        if color:
+            self.changeTilesColor('drag_and_drop')
         if ((fromRow + rowSpan > self.rowNumber) or (fromColumn + columnSpan > self.columnNumber) or
                 (fromRow < 0) or (fromColumn < 0)):
             isEmpty = False
         else:
             isEmpty = all([not self.tileMap[fromRow + row][fromColumn + column].isFilled()
                            for row in range(rowSpan) for column in range(columnSpan)])
-        if isEmpty:
+        if isEmpty and color:
             self.changeTilesColor('empty_check', (fromRow, fromColumn), (rowSpan, columnSpan))
         return isEmpty
 
