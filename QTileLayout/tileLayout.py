@@ -46,6 +46,7 @@ class QTileLayout(QtWidgets.QGridLayout):
             'drag_and_drop': (211, 211, 211),
             'idle': (240, 240, 240),
             'resize': (211, 211, 211),
+            'empty_check': (200, 200, 200),
         }
 
         self.setRowStretch(self.rowNumber, 1)
@@ -189,6 +190,10 @@ class QTileLayout(QtWidgets.QGridLayout):
         """the tile color during drag and drop"""
         self.colorMap['drag_and_drop'] = color
 
+    def setColorEmptyCheck(self, color: tuple):
+        """the tile color, if empty, during drag and drop"""
+        self.colorMap['empty_check'] = color
+
     def rowCount(self) -> int:
         """Returns the number of rows"""
         return self.rowNumber
@@ -258,7 +263,7 @@ class QTileLayout(QtWidgets.QGridLayout):
         (dirX, dirY) = direction
 
         # increase tile size
-        if tileNumber*(dirX + dirY) > 0:
+        if tileNumber * (dirX + dirY) > 0:
             tileNumber, tilesToMerge = self.__getTilesToMerge(direction, fromRow, fromColumn, tileNumber)
         # decrease tile size
         else:
@@ -296,14 +301,19 @@ class QTileLayout(QtWidgets.QGridLayout):
         super().addWidget(tile, fromRow, fromColumn)
         return tile
 
-    def isAreaEmpty(self, fromRow, fromColumn, rowSpan, columnSpan):
+    def isAreaEmpty(self, fromRow, fromColumn, rowSpan, columnSpan, color=''):
         """checks if the given space is free from widgets"""
+        if color is not '' and isinstance(color, str):
+            self.changeTilesColor(color)
         if ((fromRow + rowSpan > self.rowNumber) or (fromColumn + columnSpan > self.columnNumber) or
                 (fromRow < 0) or (fromColumn < 0)):
-            return False
+            isEmpty = False
         else:
-            return all([not self.tileMap[fromRow + row][fromColumn + column].isFilled()
-                        for row in range(rowSpan) for column in range(columnSpan)])
+            isEmpty = all([not self.tileMap[fromRow + row][fromColumn + column].isFilled()
+                           for row in range(rowSpan) for column in range(columnSpan)])
+        if isEmpty and color is not '' and isinstance(color, str):
+            self.changeTilesColor('empty_check', (fromRow, fromColumn), (rowSpan, columnSpan))
+        return isEmpty
 
     def getWidgetToDrop(self):
         """gets the widget that the user is dragging"""
@@ -315,14 +325,16 @@ class QTileLayout(QtWidgets.QGridLayout):
         """sets the widget that the user is dragging"""
         self.widgetToDrop = widget
 
-    def changeTilesColor(self, colorChoice):
+    def changeTilesColor(self, colorChoice, from_tile=(0, 0), to_tile=None):
         """changes the color of all tiles"""
         palette = QPalette()
         palette.setColor(QPalette.Background, QtGui.QColor(*self.colorMap[colorChoice]))
         palette_idle = QPalette()
         palette_idle.setColor(QPalette.Background, QtGui.QColor(*self.colorMap['idle']))
-        for row in range(self.rowNumber):
-            for column in range(self.columnNumber):
+        if to_tile is None:
+            to_tile = (self.rowNumber, self.columnNumber)
+        for row in range(from_tile[0], from_tile[0] + to_tile[0]):
+            for column in range(from_tile[1], from_tile[1] + to_tile[1]):
                 if not self.tileMap[row][column].isFilled():
                     self.tileMap[row][column].changeColor(palette)
                 else:
@@ -399,16 +411,16 @@ class QTileLayout(QtWidgets.QGridLayout):
 
         tileNumber = (
             tileNumber
-            if -tileNumber*(dirX + dirY) < columnSpan*(dirX != 0) + rowSpan*(dirY != 0)
-            else (1 - columnSpan)*dirX + (1 - rowSpan)*dirY
+            if -tileNumber * (dirX + dirY) < columnSpan * (dirX != 0) + rowSpan * (dirY != 0)
+            else (1 - columnSpan) * dirX + (1 - rowSpan) * dirY
         )
         tilesToMerge = [
             (
-                fromRow + row + (rowSpan - 2*row - 1)*(dirY == 1),
-                fromColumn + column + (columnSpan - 2*column - 1)*(dirX == 1)
+                fromRow + row + (rowSpan - 2 * row - 1) * (dirY == 1),
+                fromColumn + column + (columnSpan - 2 * column - 1) * (dirX == 1)
             )
-            for row in range(-tileNumber*dirY + rowSpan*(dirX != 0))
-            for column in range(-tileNumber*dirX + columnSpan*(dirY != 0))
+            for row in range(-tileNumber * dirY + rowSpan * (dirX != 0))
+            for column in range(-tileNumber * dirX + columnSpan * (dirY != 0))
         ]
 
         return tileNumber, tilesToMerge
@@ -423,20 +435,20 @@ class QTileLayout(QtWidgets.QGridLayout):
         (dirX, dirY) = direction
 
         tileNumber = (
-            max(tileNumber, -fromColumn*(dirX != 0) - fromRow*(dirY != 0))
+            max(tileNumber, -fromColumn * (dirX != 0) - fromRow * (dirY != 0))
             if (dirX + dirY == -1)
             else min(
                 tileNumber,
-                ((self.columnNumber - fromColumn - columnSpan)*(dirX != 0)
-                 + (self.rowNumber - fromRow - rowSpan)*(dirY != 0))
+                ((self.columnNumber - fromColumn - columnSpan) * (dirX != 0)
+                 + (self.rowNumber - fromRow - rowSpan) * (dirY != 0))
             )
         )
 
         # west or east
         if dirX != 0:
-            for column in range(tileNumber*dirX):
+            for column in range(tileNumber * dirX):
                 tilesToCheck = []
-                columnDelta = (columnSpan + column)*(dirX == 1) + (-column - 1)*(dirX == -1)
+                columnDelta = (columnSpan + column) * (dirX == 1) + (-column - 1) * (dirX == -1)
                 for row in range(rowSpan):
                     tilesToCheck.append((fromRow + row, fromColumn + columnDelta))
                     if self.tileMap[fromRow + row][fromColumn + columnDelta].isFilled():
@@ -446,9 +458,9 @@ class QTileLayout(QtWidgets.QGridLayout):
 
         # north or south
         else:
-            for row in range(tileNumber*dirY):
+            for row in range(tileNumber * dirY):
                 tilesToCheck = []
-                rowDelta = (rowSpan + row)*(dirY == 1) + (-row - 1)*(dirY == -1)
+                rowDelta = (rowSpan + row) * (dirY == 1) + (-row - 1) * (dirY == -1)
                 for column in range(columnSpan):
                     tilesToCheck.append((fromRow + rowDelta, fromColumn + column))
                     if self.tileMap[fromRow + rowDelta][fromColumn + column].isFilled():

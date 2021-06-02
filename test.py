@@ -91,8 +91,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tile_layout.setColorIdle((240, 240, 240))
         # set tile color during resize
         self.tile_layout.setColorResize((211, 211, 211))
-        # set tile color during drag and drop
+        # set tile color of all tiles during drag and drop
         self.tile_layout.setColorDragAndDrop((211, 211, 211))
+        # set tile color of hovered tiles during drag and drop, if empty
+        self.tile_layout.setColorEmptyCheck((31, 11, 211))
 
         # add widgets in the tile layout
         for i_row in range(row_number - 2):

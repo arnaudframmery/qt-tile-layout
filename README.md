@@ -135,6 +135,11 @@ _Sets the default RGB color of the tiles_
 _Sets the RGB color of the tiles during resizing_  
 &nbsp;
 
+- ```setColorEmptyCheck(tuple color)```
+
+_Sets the RGB color of the tiles where the dragged tile fits during drag and drop_  
+&nbsp;
+
 - ```setColumnsWidth(int width)```
 
 _Sets the tiles width (in pixels) of span one_  
