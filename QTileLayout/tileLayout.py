@@ -301,17 +301,17 @@ class QTileLayout(QtWidgets.QGridLayout):
         super().addWidget(tile, fromRow, fromColumn)
         return tile
 
-    def isAreaEmpty(self, fromRow, fromColumn, rowSpan, columnSpan, color=False):
+    def isAreaEmpty(self, fromRow, fromColumn, rowSpan, columnSpan, color=''):
         """checks if the given space is free from widgets"""
-        if color:
-            self.changeTilesColor('drag_and_drop')
+        if color is not '' and isinstance(color, str):
+            self.changeTilesColor(color)
         if ((fromRow + rowSpan > self.rowNumber) or (fromColumn + columnSpan > self.columnNumber) or
                 (fromRow < 0) or (fromColumn < 0)):
             isEmpty = False
         else:
             isEmpty = all([not self.tileMap[fromRow + row][fromColumn + column].isFilled()
                            for row in range(rowSpan) for column in range(columnSpan)])
-        if isEmpty and color:
+        if isEmpty and color is not '' and isinstance(color, str):
             self.changeTilesColor('empty_check', (fromRow, fromColumn), (rowSpan, columnSpan))
         return isEmpty
 
