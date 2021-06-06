@@ -1,8 +1,10 @@
 # qt-tile-layout
 
+![PyPI](https://img.shields.io/pypi/v/pyqt5-tile-layout)
+
 A tile layout for PyQt where you can put any widget in a tile. The user is then able to drag and drop the tiles and resize them
 
-![](showoff.gif)
+![](https://github.com/arnaudframmery/qt-tile-layout/blob/main/showoff.gif?raw=true)
 
 # Quick example
 
@@ -41,7 +43,7 @@ layout.addWidget(
     fromRow=3,
     fromColumn=2,
     rowSpan=1,
-    columnSpan=2
+    columnSpan=2,
 )
 ```
 

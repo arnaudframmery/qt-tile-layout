@@ -46,7 +46,7 @@ class QTileLayout(QtWidgets.QGridLayout):
             'drag_and_drop': (211, 211, 211),
             'idle': (240, 240, 240),
             'resize': (211, 211, 211),
-            'empty_check': (200, 200, 200),
+            'empty_check': (150, 150, 150),
         }
 
         self.setRowStretch(self.rowNumber, 1)
@@ -303,7 +303,7 @@ class QTileLayout(QtWidgets.QGridLayout):
 
     def isAreaEmpty(self, fromRow, fromColumn, rowSpan, columnSpan, color=''):
         """checks if the given space is free from widgets"""
-        if color is not '' and isinstance(color, str):
+        if isinstance(color, str) and color in self.colorMap.keys():
             self.changeTilesColor(color)
         if ((fromRow + rowSpan > self.rowNumber) or (fromColumn + columnSpan > self.columnNumber) or
                 (fromRow < 0) or (fromColumn < 0)):
@@ -311,7 +311,7 @@ class QTileLayout(QtWidgets.QGridLayout):
         else:
             isEmpty = all([not self.tileMap[fromRow + row][fromColumn + column].isFilled()
                            for row in range(rowSpan) for column in range(columnSpan)])
-        if isEmpty and color is not '' and isinstance(color, str):
+        if isEmpty and isinstance(color, str) and color in self.colorMap.keys():
             self.changeTilesColor('empty_check', (fromRow, fromColumn), (rowSpan, columnSpan))
         return isEmpty
 
