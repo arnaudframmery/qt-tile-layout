@@ -205,6 +205,7 @@ class Tile(QtWidgets.QWidget):
         previousColumnSpan = self.columnSpan
 
         self.tileLayout.setWidgetToDrop(self.widget)
+        self.widget.clearFocus()
         self.tileLayout.removeWidget(self.widget)
         self.setVisible(False)
         self.tileLayout.changeTilesColor('drag_and_drop')
