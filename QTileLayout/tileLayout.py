@@ -254,26 +254,22 @@ class QTileLayout(QtWidgets.QGridLayout):
         """Returns the widgets currently in the layout"""
         return self.widgetTileCouple['widget']
 
+    def highlightTiles(self, direction, fromRow, fromColumn, tileNumber):
+        """highlights tiles that will be merged during resizing"""
+        tile = self.tileMap[fromRow][fromColumn]
+        tilesToMerge, increase, fromRow, fromColumn, rowSpan, columnSpan = self.__getTilesToBeResized(
+            tile, direction, fromRow, fromColumn, tileNumber
+        )
+
+        if tilesToMerge:
+            self.changeTilesColor('empty_check', (fromRow, fromColumn), (rowSpan, columnSpan))
+
     def resizeTile(self, direction, fromRow, fromColumn, tileNumber):
         """called when a tile is resized"""
         tile = self.tileMap[fromRow][fromColumn]
-        rowSpan = tile.getRowSpan()
-        columnSpan = tile.getColumnSpan()
-        increase = True
-        (dirX, dirY) = direction
-
-        # increase tile size
-        if tileNumber * (dirX + dirY) > 0:
-            tileNumber, tilesToMerge = self.__getTilesToMerge(direction, fromRow, fromColumn, tileNumber)
-        # decrease tile size
-        else:
-            tileNumber, tilesToMerge = self.__getTilesToSplit(direction, fromRow, fromColumn, tileNumber)
-            increase = False
-
-        columnSpan += tileNumber * dirX
-        fromColumn += tileNumber * (dirX == -1)
-        rowSpan += tileNumber * dirY
-        fromRow += tileNumber * (dirY == -1)
+        tilesToMerge, increase, fromRow, fromColumn, rowSpan, columnSpan = self.__getTilesToBeResized(
+            tile, direction, fromRow, fromColumn, tileNumber
+        )
 
         if tilesToMerge:
             if increase:
@@ -401,6 +397,28 @@ class QTileLayout(QtWidgets.QGridLayout):
                 self.tileMap[row][column] = tile
 
         return tile
+
+    def __getTilesToBeResized(self, tile, direction, fromRow, fromColumn, tileNumber):
+        """recovers the tiles that will be merged or split during resizing"""
+        rowSpan = tile.getRowSpan()
+        columnSpan = tile.getColumnSpan()
+        increase = True
+        (dirX, dirY) = direction
+
+        # increase tile size
+        if tileNumber * (dirX + dirY) > 0:
+            tileNumber, tilesToMerge = self.__getTilesToMerge(direction, fromRow, fromColumn, tileNumber)
+        # decrease tile size
+        else:
+            tileNumber, tilesToMerge = self.__getTilesToSplit(direction, fromRow, fromColumn, tileNumber)
+            increase = False
+
+        columnSpan += tileNumber * dirX
+        fromColumn += tileNumber * (dirX == -1)
+        rowSpan += tileNumber * dirY
+        fromRow += tileNumber * (dirY == -1)
+
+        return tilesToMerge, increase, fromRow, fromColumn, rowSpan, columnSpan
 
     def __getTilesToSplit(self, direction, fromRow, fromColumn, tileNumber):
         """finds the tiles to split when a tile is decreased"""

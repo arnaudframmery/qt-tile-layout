@@ -26,6 +26,7 @@ class Tile(QtWidgets.QWidget):
         self.filled = False
         self.widget = None
         self.lock = None
+        self.currentTileNumber = 0
         self.layout = QVBoxLayout()
         self.layout.setSpacing(0)
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -101,6 +102,16 @@ class Tile(QtWidgets.QWidget):
             else:
                 self.setCursor(QtGui.QCursor(self.tileLayout.cursorIdle))
 
+        else:
+            # highlight tiles that are going to be merged in the resizing
+            x, y = event.pos().x(), event.pos().y()
+            tileNumber = self.__getResizeTileNumber(x, y)
+
+            if tileNumber != self.currentTileNumber:
+                self.currentTileNumber = tileNumber
+                self.tileLayout.changeTilesColor('resize')
+                self.tileLayout.highlightTiles(self.lock, self.fromRow, self.fromColumn, tileNumber)
+
     def mousePressEvent(self, event):
         """actions to do when the mouse button is pressed"""
         if event.button() != Qt.LeftButton:
@@ -132,20 +143,11 @@ class Tile(QtWidgets.QWidget):
             return None
 
         x, y = event.pos().x(), event.pos().y()
-        (dirX, dirY) = self.lock
-
-        span = self.horizontalSpan * (dirX != 0) + self.verticalSpan * (dirY != 0)
-        tileSpan = self.columnSpan * (dirX != 0) + self.rowSpan * (dirY != 0)
-        spacing = self.tileLayout.verticalSpacing() * (dirX != 0) + self.tileLayout.horizontalSpacing() * (
-                    dirY != 0)
-
-        tileNumber = int(
-            (x * (dirX != 0) + y * (dirY != 0) + (span / 2) - span * tileSpan * ((dirX + dirY) == 1)) // (
-                        span + spacing)
-        )
+        tileNumber = self.__getResizeTileNumber(x, y)
 
         self.tileLayout.resizeTile(self.lock, self.fromRow, self.fromColumn, tileNumber)
         self.tileLayout.changeTilesColor('idle')
+        self.currentTileNumber = 0
         self.lock = None
 
     def dragEnterEvent(self, event):
@@ -240,6 +242,20 @@ class Tile(QtWidgets.QWidget):
             dropData['row_span'],
             dropData['column_span'],
             color='drag_and_drop'
+        )
+
+    def __getResizeTileNumber(self, x, y):
+        """finds the tile number when resizing"""
+        (dirX, dirY) = self.lock
+
+        span = self.horizontalSpan * (dirX != 0) + self.verticalSpan * (dirY != 0)
+        tileSpan = self.columnSpan * (dirX != 0) + self.rowSpan * (dirY != 0)
+        spacing = self.tileLayout.verticalSpacing() * (dirX != 0) + self.tileLayout.horizontalSpacing() * (
+                dirY != 0)
+
+        return int(
+            (x * (dirX != 0) + y * (dirY != 0) + (span / 2) - span * tileSpan * ((dirX + dirY) == 1))
+            // (span + spacing)
         )
 
     def __removeWidget(self):
