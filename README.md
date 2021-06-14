@@ -15,14 +15,20 @@ Moreover, you can change the value of ```static_layout``` variable to ```False``
 
 # Create and use a tile layout
 
-First of all, the import statement
+First of all, you have to install the PyPi package:
+
+```shell script
+pip install pyqt5-tile-layout
+```
+
+And import the QTileLayout:
 
 ```python
 from QTileLayout import QTileLayout
 ```
 
 Then, let's create a tile layout with 8 rows and 5 columns.  
-We also give the vertical and horizontal spawn in pixel
+We also give the vertical and horizontal spawn in pixel:
 
 ```python
 layout = QTileLayout(
@@ -35,7 +41,7 @@ layout = QTileLayout(
 )
 ```
 
-We can now add a widget in a specific position: it's the same as the grid layout
+We can now add a widget in a specific position: it's the same as the grid layout:
 
 ```python
 layout.addWidget(
@@ -51,7 +57,7 @@ Finally, if you put your layout into a window, you will be able to drag and drop
 
 # Documentation
 
-```QTileLayout(int fromRow, int fromColumn, int rowSpan, int columnSpan)```
+```QTileLayout(int fromRow, int fromColumn, int rowSpan, int columnSpan, int verticalSpacing, int horizontalSpacing)```
 
 _Constructs a new tile layout_
 

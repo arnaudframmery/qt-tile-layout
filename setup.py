@@ -5,7 +5,7 @@ with open('./README.md', encoding='utf-8') as f:
 
 setup(
     name="pyqt5-tile-layout",
-    version="0.1.4",
+    version="0.1.5",
     author="Arnaud Frammery",
     author_email="arnaud.frammery@gmail.com",
     description="A tile layout for PyQt5",
