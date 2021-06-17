@@ -37,12 +37,15 @@ class Label(QtWidgets.QLabel):
 
     def focusInEvent(self, event):
         print("WIDGET FOCUS IN EVENT", self)
+        super().focusInEvent(event)
 
     def focusOutEvent(self, event):
         print("WIDGET FOCUS OUT EVENT", self)
+        super().focusOutEvent(event)
 
     def keyPressEvent(self, ev: QtGui.QKeyEvent):
         print("WIDGET KEY PRESSED", self)
+        super().keyPressEvent(ev)
 
 
 class MainWindow(QtWidgets.QMainWindow):
