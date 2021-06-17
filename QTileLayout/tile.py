@@ -85,30 +85,31 @@ class Tile(QtWidgets.QWidget):
         print('event', event)
         if event.buttons() == Qt.LeftButton:
             # adjust offset from clicked point to origin of widget
-            globalPos = event.globalPos()
-            lastpos = self.mapToGlobal(self.__mouseMovePos)
-            diff = globalPos - lastpos  # calculate the difference when moving the mouse
-            if diff.manhattanLength() > 3:
-                if self.lock is None and not self.drag_in_process:
-                    if event.pos().x() < self.resizeMargin and self.tileLayout.resizable:
-                        self.lock = (-1, 0)  # 'west'
-                    elif event.pos().x() > self.width() - self.resizeMargin and self.tileLayout.resizable:
-                        self.lock = (1, 0)  # 'east'
-                    elif event.pos().y() < self.resizeMargin and self.tileLayout.resizable:
-                        self.lock = (0, -1)  # 'north'
-                    elif event.pos().y() > self.height() - self.resizeMargin and self.tileLayout.resizable:
-                        self.lock = (0, 1)  # 'south'
+            if self.__mouseMovePos:
+                globalPos = event.globalPos()
+                lastpos = self.mapToGlobal(self.__mouseMovePos)
+                diff = globalPos - lastpos  # calculate the difference when moving the mouse
+                if diff.manhattanLength() > 3:
+                    if self.lock is None and not self.drag_in_process:
+                        if event.pos().x() < self.resizeMargin and self.tileLayout.resizable:
+                            self.lock = (-1, 0)  # 'west'
+                        elif event.pos().x() > self.width() - self.resizeMargin and self.tileLayout.resizable:
+                            self.lock = (1, 0)  # 'east'
+                        elif event.pos().y() < self.resizeMargin and self.tileLayout.resizable:
+                            self.lock = (0, -1)  # 'north'
+                        elif event.pos().y() > self.height() - self.resizeMargin and self.tileLayout.resizable:
+                            self.lock = (0, 1)  # 'south'
 
-                    if self.lock is not None:
-                        self.tileLayout.changeTilesColor('resize')
+                        if self.lock is not None:
+                            self.tileLayout.changeTilesColor('resize')
 
-                    elif self.filled and self.tileLayout.dragAndDrop:
-                        drag = self.__prepareDropData(event)
-                        self.__dragAndDropProcess(drag)
-                        self.tileLayout.changeTilesColor('idle')
+                        elif self.filled and self.tileLayout.dragAndDrop:
+                            drag = self.__prepareDropData(event)
+                            self.__dragAndDropProcess(drag)
+                            self.tileLayout.changeTilesColor('idle')
 
-                    if self.filled:
-                        self.widget.setFocus()
+                        if self.filled:
+                            self.widget.setFocus()
         if not self.filled:
             self.setCursor(QtGui.QCursor(self.tileLayout.cursorIdle))
 
