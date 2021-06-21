@@ -82,7 +82,6 @@ class Tile(QtWidgets.QWidget):
 
     def mouseMoveEvent(self, event):
         """actions to do when the mouse is moved"""
-        print('event', event)
         if event.buttons() == Qt.LeftButton:
             # adjust offset from clicked point to origin of widget
             if self.__mouseMovePos:
@@ -90,26 +89,16 @@ class Tile(QtWidgets.QWidget):
                 lastpos = self.mapToGlobal(self.__mouseMovePos)
                 diff = globalPos - lastpos  # calculate the difference when moving the mouse
                 if diff.manhattanLength() > 3:
-                    if self.lock is None and not self.drag_in_process:
-                        if event.pos().x() < self.resizeMargin and self.tileLayout.resizable:
-                            self.lock = (-1, 0)  # 'west'
-                        elif event.pos().x() > self.width() - self.resizeMargin and self.tileLayout.resizable:
-                            self.lock = (1, 0)  # 'east'
-                        elif event.pos().y() < self.resizeMargin and self.tileLayout.resizable:
-                            self.lock = (0, -1)  # 'north'
-                        elif event.pos().y() > self.height() - self.resizeMargin and self.tileLayout.resizable:
-                            self.lock = (0, 1)  # 'south'
+                    if not self.drag_in_process and self.lock is None:
 
-                        if self.lock is not None:
-                            self.tileLayout.changeTilesColor('resize')
-
-                        elif self.filled and self.tileLayout.dragAndDrop:
+                        if self.filled and self.tileLayout.dragAndDrop:
                             drag = self.__prepareDropData(event)
                             self.__dragAndDropProcess(drag)
                             self.tileLayout.changeTilesColor('idle')
 
                         if self.filled:
                             self.widget.setFocus()
+
         if not self.filled:
             self.setCursor(QtGui.QCursor(self.tileLayout.cursorIdle))
 
@@ -145,16 +134,26 @@ class Tile(QtWidgets.QWidget):
 
     def mousePressEvent(self, event):
         """actions to do when the mouse button is pressed"""
-        if event.button() != Qt.LeftButton:
+        if event.button() == Qt.LeftButton:
+            self.__mouseMovePos = event.pos()
+            if event.pos().x() < self.resizeMargin and self.tileLayout.resizable:
+                self.lock = (-1, 0)  # 'west'
+            elif event.pos().x() > self.width() - self.resizeMargin and self.tileLayout.resizable:
+                self.lock = (1, 0)  # 'east'
+            elif event.pos().y() < self.resizeMargin and self.tileLayout.resizable:
+                self.lock = (0, -1)  # 'north'
+            elif event.pos().y() > self.height() - self.resizeMargin and self.tileLayout.resizable:
+                self.lock = (0, 1)  # 'south'
+            if self.lock is not None:
+                self.tileLayout.changeTilesColor('resize')
+        else:
             self.__mouseMovePos = None
-            return super().mousePressEvent(event)
-        self.__mouseMovePos = event.pos()
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
         """actions to do when the mouse button is released"""
         if self.lock is None:
-            return super().mouseReleaseEvent(event)
+            super().mouseReleaseEvent(event)
 
         x, y = event.pos().x(), event.pos().y()
         tileNumber = self.__getResizeTileNumber(x, y)
