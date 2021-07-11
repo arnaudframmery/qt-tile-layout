@@ -156,6 +156,9 @@ class MainWindow(QtWidgets.QMainWindow):
         # set the tiles width
         self.tile_layout.setColumnsWidth(150)
 
+        # set the focus on widget after drag & drop or resize
+        self.tile_layout.activateFocus(False)
+
         # actions to do when a tile is resized
         self.tile_layout.tileResized.connect(self.__tileHasBeenResized)
         # actions to do when a tile is moved
