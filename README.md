@@ -73,6 +73,11 @@ _Allows or not the drag and drop of tiles in the layout_
 _Allows or not the resizing of tiles in the layout_  
 &nbsp;
 
+- ```activateFocus(bool focus)```
+
+_Activates or not the widget focus after drag & drop or resize. This feature can lead to unexpected behaviours in some cases, please set focus on false if you notice any of them_  
+&nbsp;
+
 - ```addcolumns(int columnNumber)```
 
 _Adds columns at the right of the layout_  

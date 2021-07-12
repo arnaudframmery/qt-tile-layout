@@ -37,12 +37,15 @@ class Label(QtWidgets.QLabel):
 
     def focusInEvent(self, event):
         print("WIDGET FOCUS IN EVENT", self)
+        super().focusInEvent(event)
 
     def focusOutEvent(self, event):
         print("WIDGET FOCUS OUT EVENT", self)
+        super().focusOutEvent(event)
 
     def keyPressEvent(self, ev: QtGui.QKeyEvent):
         print("WIDGET KEY PRESSED", self)
+        super().keyPressEvent(ev)
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -152,6 +155,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tile_layout.setRowsHeight(100)
         # set the tiles width
         self.tile_layout.setColumnsWidth(150)
+
+        # set the focus on widget after drag & drop or resize
+        self.tile_layout.activateFocus(False)
 
         # actions to do when a tile is resized
         self.tile_layout.tileResized.connect(self.__tileHasBeenResized)

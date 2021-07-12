@@ -32,6 +32,7 @@ class QTileLayout(QtWidgets.QGridLayout):
         # logic parameters
         self.dragAndDrop = True
         self.resizable = True
+        self.focus = False
         self.widgetToDrop = None
         self.tileMap = []
         self.widgetTileCouple = {'widget': [], 'tile': []}
@@ -249,6 +250,10 @@ class QTileLayout(QtWidgets.QGridLayout):
         """Sets the horizontal spacing between two tiles"""
         super().setHorizontalSpacing(spacing)
         self.__updateAllTiles()
+
+    def activateFocus(self, focus: bool):
+        """activates or not the widget focus after drag & drop or resize"""
+        self.focus = focus
 
     def widgetList(self) -> list:
         """Returns the widgets currently in the layout"""
