@@ -230,7 +230,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tile_layout.updateGlobalSize(a0)
 
 
-app = QtWidgets.QApplication(sys.argv)
-window = MainWindow()
-window.show()
-app.exec()
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    app.exec()

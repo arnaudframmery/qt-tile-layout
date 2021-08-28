@@ -13,9 +13,11 @@ You can have an overview of how to use the different methods in this script.
 
 Moreover, you can change the value of ```static_layout``` variable to ```False``` to experiment a tile layout where the tile sizes are dynamics with the parent widget size (like a classic layout)
 
+If you are interested about drag and drop widgets between several QTileLayouts, check the ```testLink.py``` script.
+
 # Create and use a tile layout
 
-First of all, you have to install the PyPi package:
+First, you have to install the PyPi package:
 
 ```shell script
 pip install pyqt5-tile-layout
@@ -106,6 +108,11 @@ _Returns the minimal tile width of span one_
 - ```horizontalSpacing() -> int```
 
 _Returns the horizontal spacing between two tiles_  
+&nbsp;
+
+- ```linkLayout(QTileLayout layout)```
+
+_Allows the drag and drop between several layouts (see testLink.py)_  
 &nbsp;
 
 - ```removecolumns(int columnNumber)```
@@ -206,6 +213,11 @@ _Changes the vertical spacing between two tiles_
 - ```tileRect(int row, int column) -> QRect```
 
 _Returns the geometry of the tile at (row, column)_  
+&nbsp;
+
+- ```unLinkLayout(QTileLayout layout)```
+
+_Forbids the drag and drop between several layouts (see testLink.py)_  
 &nbsp;
 
 - ```verticalSpacing() -> int```
