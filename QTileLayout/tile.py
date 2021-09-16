@@ -264,7 +264,7 @@ class Tile(QtWidgets.QWidget):
         else:
             self.originTileLayout = self.tileLayout.linkedLayout[dropData['id']]
 
-        for key, value in self.tileLayout.linkedLayout.items():
+        for key, value in self.originTileLayout.linkedLayout.items():
             if value.dragAndDrop:
                 value.changeTilesColor('drag_and_drop')
 

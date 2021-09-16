@@ -36,8 +36,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tile_layout_2 = QTileLayout(
             rowNumber=row_number,
             columnNumber=column_number,
+            verticalSpan=vertical_span + 50,
+            horizontalSpan=horizontal_span - 50,
+            verticalSpacing=spacing,
+            horizontalSpacing=spacing,
+        )
+        self.tile_layout_3 = QTileLayout(
+            rowNumber=row_number,
+            columnNumber=column_number,
             verticalSpan=vertical_span,
-            horizontalSpan=horizontal_span,
+            horizontalSpan=horizontal_span - 50,
             verticalSpacing=spacing,
             horizontalSpacing=spacing,
         )
@@ -55,9 +63,15 @@ class MainWindow(QtWidgets.QMainWindow):
                     fromRow=i_row,
                     fromColumn=i_column,
                 )
+                self.tile_layout_3.addWidget(
+                    widget=self.__spawnWidget(),
+                    fromRow=i_row,
+                    fromColumn=i_column,
+                )
 
         # link the layouts together
         self.tile_layout_1.linkLayout(self.tile_layout_2)
+        self.tile_layout_1.linkLayout(self.tile_layout_3)
 
         # impossible to drop on the second layout if drag and drop is not allowed on it (to test with False)
         self.tile_layout_2.acceptDragAndDrop(True)
@@ -68,11 +82,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.central_widget.setContentsMargins(0, 0, 0, 0)
         self.central_widget.setLayout(self.central_layout)
         self.left_widget = QtWidgets.QWidget()
+        self.middle_widget = QtWidgets.QWidget()
         self.right_widget = QtWidgets.QWidget()
         self.central_layout.addWidget(self.left_widget)
+        self.central_layout.addWidget(self.middle_widget)
         self.central_layout.addWidget(self.right_widget)
         self.left_widget.setLayout(self.tile_layout_1)
-        self.right_widget.setLayout(self.tile_layout_2)
+        self.middle_widget.setLayout(self.tile_layout_2)
+        self.right_widget.setLayout(self.tile_layout_3)
 
         self.setCentralWidget(self.central_widget)
 
