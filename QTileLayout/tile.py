@@ -189,6 +189,8 @@ class Tile(QtWidgets.QWidget):
         )
         self.tileLayout.tileMoved.emit(
             widget,
+            dropData['id'],
+            self.tileLayout.id,
             dropData['from_row'],
             dropData['from_column'],
             self.fromRow - dropData['row_offset'],

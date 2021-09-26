@@ -105,6 +105,11 @@ _Returns the number of column in the layout_
 _Returns the minimal tile width of span one_  
 &nbsp;
 
+- ```getId() -> str```
+
+_Returns the layout id_  
+&nbsp;
+
 - ```horizontalSpacing() -> int```
 
 _Returns the horizontal spacing between two tiles_  
@@ -232,9 +237,9 @@ _Returns the widgets that are currently in the layout_
 
 ##### Signals:
 
-- ```tileMoved(QWidget widget, int fromRow, int fromColumn, int toRow, int toColumn)```
+- ```tileMoved(QWidget widget, str fromLayoutId, str toLayoutId, int fromRow, int fromColumn, int toRow, int toColumn)```
 
-_Emits when a tile is moved successfully_  
+_Emits when a tile is moved successfully. When the source layout is not the same than the destination one, the signal is emitted from the destination layout_  
 &nbsp;
 
 - ```tileResized(QWidget widget, int fromRow, int fromColumn, int rowSpan, int columnSpan)```

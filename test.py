@@ -223,7 +223,7 @@ class MainWindow(QtWidgets.QMainWindow):
               f'with a span of ({row_span}, {column_span})')
 
     @staticmethod
-    def __tileHasBeenMoved(widget, from_row, from_column, to_row, to_column):
+    def __tileHasBeenMoved(widget, from_layout_id, to_layout_id, from_row, from_column, to_row, to_column):
         print(f'{widget} has been moved from position ({from_row}, {from_column}) to ({to_row}, {to_column})')
 
     def __centralWidgetResize(self, a0):

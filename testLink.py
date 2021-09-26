@@ -76,6 +76,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # impossible to drop on the second layout if drag and drop is not allowed on it (to test with False)
         self.tile_layout_2.acceptDragAndDrop(True)
 
+        # actions to do when a tile is moved
+        self.tile_layout_1.tileMoved.connect(self.__tileHasBeenMoved)
+        self.tile_layout_2.tileMoved.connect(self.__tileHasBeenMoved)
+        self.tile_layout_3.tileMoved.connect(self.__tileHasBeenMoved)
+
         # insert the layouts in the window
         self.central_widget = QtWidgets.QWidget()
         self.central_layout = QtWidgets.QHBoxLayout()
@@ -109,6 +114,10 @@ class MainWindow(QtWidgets.QMainWindow):
         palette = QPalette()
         palette.setColor(QPalette.Background, QtGui.QColor(*random.choice(possible_colors)))
         return palette
+
+    @staticmethod
+    def __tileHasBeenMoved(widget, from_layout_id, to_layout_id, from_row, from_column, to_row, to_column):
+        print(f'{widget} has been moved from position ({from_row}, {from_column}) in layout {from_layout_id} to ({to_row}, {to_column}) in layout {to_layout_id}')
 
 
 if __name__ == "__main__":

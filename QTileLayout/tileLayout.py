@@ -13,7 +13,7 @@ class QTileLayout(QtWidgets.QGridLayout):
     """
 
     tileResized = QtCore.pyqtSignal(QWidget, int, int, int, int)
-    tileMoved = QtCore.pyqtSignal(QWidget, int, int, int, int)
+    tileMoved = QtCore.pyqtSignal(QWidget, str, str, int, int, int, int)
 
     def __init__(self, rowNumber, columnNumber, verticalSpan, horizontalSpan, verticalSpacing=5, horizontalSpacing=5,
                  *args, **kwargs):
@@ -251,6 +251,10 @@ class QTileLayout(QtWidgets.QGridLayout):
         """Sets the horizontal spacing between two tiles"""
         super().setHorizontalSpacing(spacing)
         self.__updateAllTiles()
+
+    def getId(self):
+        """Returns the layout id"""
+        return self.id
 
     def activateFocus(self, focus: bool):
         """Activates or not the widget focus after drag & drop or resize"""
