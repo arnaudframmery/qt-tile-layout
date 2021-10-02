@@ -13,7 +13,7 @@ class QTileLayout(QtWidgets.QGridLayout):
     """
 
     tileResized = QtCore.pyqtSignal(QWidget, int, int, int, int)
-    tileMoved = QtCore.pyqtSignal(QWidget, int, int, int, int)
+    tileMoved = QtCore.pyqtSignal(QWidget, str, str, int, int, int, int)
 
     def __init__(self, rowNumber, columnNumber, verticalSpan, horizontalSpan, verticalSpacing=5, horizontalSpacing=5,
                  *args, **kwargs):
@@ -37,6 +37,7 @@ class QTileLayout(QtWidgets.QGridLayout):
         self.tileMap = []
         self.widgetTileCouple = {'widget': [], 'tile': []}
         self.id = str(uuid.uuid4())
+        self.linkedLayout = {self.id: self}
 
         # design parameters
         self.cursorIdle = QtCore.Qt.ArrowCursor
@@ -251,13 +252,34 @@ class QTileLayout(QtWidgets.QGridLayout):
         super().setHorizontalSpacing(spacing)
         self.__updateAllTiles()
 
+    def getId(self):
+        """Returns the layout id"""
+        return self.id
+
     def activateFocus(self, focus: bool):
-        """activates or not the widget focus after drag & drop or resize"""
+        """Activates or not the widget focus after drag & drop or resize"""
         self.focus = focus
 
     def widgetList(self) -> list:
         """Returns the widgets currently in the layout"""
         return self.widgetTileCouple['widget']
+
+    def linkLayout(self, layout: QtWidgets.QLayout):
+        """Links this layout with another one to allow drag and drop between them"""
+        assert isinstance(layout, QTileLayout)
+        assert layout.id not in self.linkedLayout
+        assert self.id not in layout.linkedLayout
+        self.linkedLayout[layout.id] = layout
+        layout.linkedLayout[self.id] = self
+
+    def unLinkLayout(self, layout: QtWidgets.QLayout):
+        """Unlinks this layout with another one to forbid drag and drop between them"""
+        assert isinstance(layout, QTileLayout)
+        assert layout.id != self.id
+        assert layout.id in self.linkedLayout
+        assert self.id in layout.linkedLayout
+        self.linkedLayout.pop(layout.id)
+        layout.linkedLayout.pop(self.id)
 
     def highlightTiles(self, direction, fromRow, fromColumn, tileNumber):
         """highlights tiles that will be merged during resizing"""

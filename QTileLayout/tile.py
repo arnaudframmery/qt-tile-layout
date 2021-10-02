@@ -15,6 +15,7 @@ class Tile(QtWidgets.QWidget):
                  **kwargs):
         super(Tile, self).__init__(*args, **kwargs)
         self.tileLayout = tileLayout
+        self.originTileLayout = self.tileLayout
         self.fromRow = fromRow
         self.fromColumn = fromColumn
         self.rowSpan = rowSpan
@@ -96,7 +97,8 @@ class Tile(QtWidgets.QWidget):
                     if self.filled and self.tileLayout.dragAndDrop:
                         drag = self.__prepareDropData(event)
                         self.__dragAndDropProcess(drag)
-                        self.tileLayout.changeTilesColor('idle')
+                        for key, value in self.tileLayout.linkedLayout.items():
+                            value.changeTilesColor('idle')
 
                     if self.filled and self.tileLayout.focus:
                         self.widget.setFocus()
@@ -176,7 +178,7 @@ class Tile(QtWidgets.QWidget):
     def dropEvent(self, event):
         """actions to do when a tile is dropped on this one"""
         dropData = json.loads(event.mimeData().data('TileData').data())
-        widget = self.tileLayout.getWidgetToDrop()
+        widget = self.originTileLayout.getWidgetToDrop()
 
         self.tileLayout.addWidget(
             widget,
@@ -187,6 +189,8 @@ class Tile(QtWidgets.QWidget):
         )
         self.tileLayout.tileMoved.emit(
             widget,
+            dropData['id'],
+            self.tileLayout.id,
             dropData['from_row'],
             dropData['from_column'],
             self.fromRow - dropData['row_offset'],
@@ -229,7 +233,9 @@ class Tile(QtWidgets.QWidget):
         self.widget.clearFocus()
         self.tileLayout.removeWidget(self.widget)
         self.setVisible(False)
-        self.tileLayout.changeTilesColor('drag_and_drop')
+        for key, value in self.tileLayout.linkedLayout.items():
+            if value.dragAndDrop:
+                value.changeTilesColor('drag_and_drop')
 
         if drag.exec_() != 2:
             self.__removeWidget()
@@ -244,6 +250,7 @@ class Tile(QtWidgets.QWidget):
             if self.tileLayout.focus:
                 widget.setFocus()
 
+        self.originTileLayout = self.tileLayout
         self.setVisible(True)
         self.dragInProcess = False
 
@@ -254,8 +261,14 @@ class Tile(QtWidgets.QWidget):
         except JSONDecodeError:
             return False
 
-        if dropData['id'] != self.tileLayout.id:
+        if dropData['id'] not in self.tileLayout.linkedLayout:
             return False
+        else:
+            self.originTileLayout = self.tileLayout.linkedLayout[dropData['id']]
+
+        for key, value in self.originTileLayout.linkedLayout.items():
+            if value.dragAndDrop:
+                value.changeTilesColor('drag_and_drop')
 
         return self.tileLayout.isAreaEmpty(
             self.fromRow - dropData['row_offset'],
